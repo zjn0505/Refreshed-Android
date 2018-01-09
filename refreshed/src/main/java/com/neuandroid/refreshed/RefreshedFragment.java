@@ -53,7 +53,6 @@ public class RefreshedFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_refreshed, container, false);
         viewPager = (ViewPager) view.findViewById(R.id.viewpager);
         pbLoading = (ProgressBar) view.findViewById(R.id.pb_loading);
-        viewPager.setOffscreenPageLimit(1);
         if (viewPager != null) {
             setupViewPager(viewPager);
         }
@@ -86,6 +85,8 @@ public class RefreshedFragment extends Fragment {
         }
         adapter.notifyDataSetChanged();
         viewPager.setCurrentItem(0);
+        int limit = (adapter.getCount() > 1 ? adapter.getCount() - 1 : 1);
+        viewPager.setOffscreenPageLimit(limit);
     }
 
     private class Adapter extends FragmentPagerAdapter {
