@@ -1,4 +1,4 @@
-package com.neuandroid.refreshed;
+package xyz.jienan.refreshed;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -13,10 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -28,7 +25,7 @@ import java.util.List;
 import java.util.Set;
 
 import static android.view.View.GONE;
-import static com.neuandroid.refreshed.NetworkUtils.NEWS_API_SOURCES_URL;
+import static xyz.jienan.refreshed.NetworkUtils.NEWS_API_SOURCES_URL;
 
 /**
  * Created by Jienan on 2017/7/24.

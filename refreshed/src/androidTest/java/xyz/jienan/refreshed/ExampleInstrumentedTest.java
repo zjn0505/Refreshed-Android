@@ -1,4 +1,4 @@
-package com.neuandroid.refreshed;
+package xyz.jienan.refreshed;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

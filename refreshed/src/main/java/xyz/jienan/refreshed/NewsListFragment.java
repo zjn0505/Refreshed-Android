@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.neuandroid.refreshed;
+package xyz.jienan.refreshed;
 
 import android.content.Context;
 import android.content.Intent;
@@ -37,6 +37,9 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.rohitarya.glide.facedetection.transformation.FaceCenterCrop;
+
+import xyz.jienan.refreshed.R;
 
 import java.io.Serializable;
 import java.net.URL;
@@ -173,8 +176,8 @@ public class NewsListFragment extends Fragment implements NewsQueryTask.IAsyncTa
         }
 
         public NewsAdapter(Context context, List<NewsListBean.ArticlesBean> items) {
-            context.getTheme().resolveAttribute(R.attr.selectableItemBackground, mTypedValue, true);
-            mBackground = mTypedValue.resourceId;
+//            context.getTheme().resolveAttribute(R.attr.selectableItemBackground, mTypedValue, true);
+//            mBackground = mTypedValue.resourceId;
             mArticles = items;
         }
 
@@ -186,8 +189,8 @@ public class NewsListFragment extends Fragment implements NewsQueryTask.IAsyncTa
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.list_item, parent, false);
-            view.setBackgroundResource(mBackground);
+                    .inflate(R.layout.list_item_3_3, parent, false);
+//            view.setBackgroundResource(mBackground);
             return new ViewHolder(view);
         }
 
@@ -214,6 +217,7 @@ public class NewsListFragment extends Fragment implements NewsQueryTask.IAsyncTa
             } else {
                 Glide.with(holder.mIvThumbnail.getContext())
                         .load(article.getUrlToImage())
+                        .transform(new FaceCenterCrop())
                         .into(holder.mIvThumbnail);
             }
 

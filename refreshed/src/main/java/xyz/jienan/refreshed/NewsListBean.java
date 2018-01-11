@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package com.neuandroid.refreshed;
+package xyz.jienan.refreshed;
 
 
-import java.io.Serializable;
 import java.util.List;
 
 public class NewsListBean extends BaseBean {

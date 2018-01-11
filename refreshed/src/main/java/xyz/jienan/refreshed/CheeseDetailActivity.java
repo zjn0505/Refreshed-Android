@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.neuandroid.refreshed;
+package xyz.jienan.refreshed;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -23,6 +23,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.widget.ImageView;
+
+import xyz.jienan.refreshed.R;
 
 public class CheeseDetailActivity extends AppCompatActivity {
 

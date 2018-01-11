@@ -1,4 +1,4 @@
-package com.neuandroid.refreshed;
+package xyz.jienan.refreshed;
 
 /**
  * Created by jienanzhang on 16/07/2017.

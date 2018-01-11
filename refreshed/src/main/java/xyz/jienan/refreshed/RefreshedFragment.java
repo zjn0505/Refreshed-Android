@@ -1,4 +1,4 @@
-package com.neuandroid.refreshed;
+package xyz.jienan.refreshed;
 
 import android.content.Context;
 import android.content.Intent;
@@ -24,15 +24,12 @@ import com.google.gson.Gson;
 import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.xml.transform.Source;
-
 import static android.view.View.GONE;
-import static com.neuandroid.refreshed.NetworkUtils.NEWS_API_SOURCES_URL;
+import static xyz.jienan.refreshed.NetworkUtils.NEWS_API_SOURCES_URL;
 
 /**
  * Created by jienanzhang on 17/07/2017.

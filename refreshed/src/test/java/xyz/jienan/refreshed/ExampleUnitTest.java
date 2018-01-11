@@ -1,4 +1,4 @@
-package com.neuandroid.refreshed;
+package xyz.jienan.refreshed;
 
 import org.junit.Test;
 
