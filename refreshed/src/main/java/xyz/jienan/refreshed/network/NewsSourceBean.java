@@ -1,6 +1,8 @@
-package xyz.jienan.refreshed;
+package xyz.jienan.refreshed.network;
 
 import java.util.List;
+
+import xyz.jienan.refreshed.BaseBean;
 
 /**
  * Created by Jienan on 2017/7/24.

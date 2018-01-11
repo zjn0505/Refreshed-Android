@@ -34,10 +34,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.bumptech.glide.Glide;
 import com.rohitarya.glide.facedetection.transformation.core.GlideFaceDetector;
 
-import xyz.jienan.refreshed.R;
+import xyz.jienan.refreshed.headlines.HeadlinesFragment;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -75,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
         tabLayout.setVisibility(View.GONE);
 
         FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.container, new RefreshedFragment()).commit();
+        fragmentManager.beginTransaction().replace(R.id.container, new HeadlinesFragment()).commit();
     }
 
     @Override
@@ -159,10 +158,7 @@ public class MainActivity extends AppCompatActivity {
         Class fragmentClass = null;
         switch (menuItem.getItemId()) {
             case R.id.nav_refreshed:
-                fragmentClass = RefreshedFragment.class;
-                break;
-            case R.id.nav_chuck:
-                fragmentClass = ChuckFragment.class;
+                fragmentClass = HeadlinesFragment.class;
                 break;
         }
         try {

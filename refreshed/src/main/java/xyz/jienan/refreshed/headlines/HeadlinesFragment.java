@@ -1,4 +1,4 @@
-package xyz.jienan.refreshed;
+package xyz.jienan.refreshed.headlines;
 
 import android.content.Context;
 import android.content.Intent;
@@ -28,6 +28,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import xyz.jienan.refreshed.NetworkUtils;
+import xyz.jienan.refreshed.NewsQueryTask;
+import xyz.jienan.refreshed.network.NewsSourceBean;
+import xyz.jienan.refreshed.R;
+import xyz.jienan.refreshed.SourcesSelectActivity;
+import xyz.jienan.refreshed.news_list.NewsListFragment;
+
 import static android.view.View.GONE;
 import static xyz.jienan.refreshed.NetworkUtils.NEWS_API_SOURCES_URL;
 
@@ -35,7 +42,7 @@ import static xyz.jienan.refreshed.NetworkUtils.NEWS_API_SOURCES_URL;
  * Created by jienanzhang on 17/07/2017.
  */
 
-public class RefreshedFragment extends Fragment {
+public class HeadlinesFragment extends Fragment implements HeadlinesContract.View {
 
     private ProgressBar pbLoading;
     private Adapter adapter;
@@ -43,10 +50,13 @@ public class RefreshedFragment extends Fragment {
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
     private ViewPager viewPager;
+    private HeadlinesContract.Presenter mPresenter;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+
+        mPresenter = new HeadlinesPresenter(this);
         View view = inflater.inflate(R.layout.fragment_refreshed, container, false);
         viewPager = (ViewPager) view.findViewById(R.id.viewpager);
         pbLoading = (ProgressBar) view.findViewById(R.id.pb_loading);
@@ -56,7 +66,8 @@ public class RefreshedFragment extends Fragment {
         tabLayout = (TabLayout) getActivity().findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
         setHasOptionsMenu(true);
-        querySources();
+//        querySources();
+        mPresenter.loadSources();
         sharedPreferences = getActivity().getSharedPreferences("refreshed_source", Context.MODE_PRIVATE);
         editor = sharedPreferences.edit();
         return view;
@@ -84,6 +95,11 @@ public class RefreshedFragment extends Fragment {
         viewPager.setCurrentItem(0);
         int limit = (adapter.getCount() > 1 ? adapter.getCount() - 1 : 1);
         viewPager.setOffscreenPageLimit(limit);
+    }
+
+    @Override
+    public void renderSources(NewsSourceBean sources) {
+        filterBySourcesSelection(sources);
     }
 
     private class Adapter extends FragmentPagerAdapter {
@@ -169,22 +185,26 @@ public class RefreshedFragment extends Fragment {
                 tabLayout.setVisibility(View.VISIBLE);
                 NewsSourceBean bean = (NewsSourceBean) result;
 
-                Set<String> selectedSet = sharedPreferences.getStringSet("selected_sources", null);
-                if (selectedSet == null) {
-                    List<NewsSourceBean.SourcesBean> sourceList = bean.getSources().subList(0, 4);
-                    Set<String> selectedSources = new HashSet();
-                    for (NewsSourceBean.SourcesBean source : sourceList) {
-                        String id = source.getId();
-                        String name = source.getName();
-                        selectedSources.add(id + "|" + name);
-                    }
-                    editor.putStringSet("selected_sources", selectedSources);
-                    editor.commit();
-                    addSourcesToAdapter(selectedSources);
-                } else {
-                    addSourcesToAdapter(selectedSet);
-                }
+                filterBySourcesSelection(bean);
             }
+        }
+    }
+
+    private void filterBySourcesSelection(NewsSourceBean bean) {
+        Set<String> selectedSet = sharedPreferences.getStringSet("selected_sources", null);
+        if (selectedSet == null) {
+            List<NewsSourceBean.SourcesBean> sourceList = bean.getSources().subList(0, 4);
+            Set<String> selectedSources = new HashSet();
+            for (NewsSourceBean.SourcesBean source : sourceList) {
+                String id = source.getId();
+                String name = source.getName();
+                selectedSources.add(id + "|" + name);
+            }
+            editor.putStringSet("selected_sources", selectedSources);
+            editor.commit();
+            addSourcesToAdapter(selectedSources);
+        } else {
+            addSourcesToAdapter(selectedSet);
         }
     }
 
@@ -197,8 +217,8 @@ public class RefreshedFragment extends Fragment {
                 addSourcesToAdapter(selectedSet);
                 getFragmentManager()
                         .beginTransaction()
-                        .detach(RefreshedFragment.this)
-                        .attach(RefreshedFragment.this)
+                        .detach(HeadlinesFragment.this)
+                        .attach(HeadlinesFragment.this)
                         .commit();
             }
         }

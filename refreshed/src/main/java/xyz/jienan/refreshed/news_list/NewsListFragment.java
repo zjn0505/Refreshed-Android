@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package xyz.jienan.refreshed;
+package xyz.jienan.refreshed.news_list;
 
 import android.content.Context;
 import android.content.Intent;
@@ -39,18 +39,25 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.rohitarya.glide.facedetection.transformation.FaceCenterCrop;
 
+import xyz.jienan.refreshed.NetworkUtils;
+import xyz.jienan.refreshed.NewsQueryTask;
 import xyz.jienan.refreshed.R;
+import xyz.jienan.refreshed.TimeUtils;
+import xyz.jienan.refreshed.network.ArticlesBean;
+import xyz.jienan.refreshed.network.HeadlinesBean;
+import xyz.jienan.refreshed.network.NewsListBeanV1;
 
 import java.io.Serializable;
 import java.net.URL;
 import java.util.List;
 
-public class NewsListFragment extends Fragment implements NewsQueryTask.IAsyncTaskListener, SwipeRefreshLayout.OnRefreshListener {
+public class NewsListFragment extends Fragment implements NewsListContract.View, NewsQueryTask.IAsyncTaskListener, SwipeRefreshLayout.OnRefreshListener {
 
     private SwipeRefreshLayout refreshLayout;
     private String newsSource;
     private NewsAdapter mAdapter;
     private ProgressBar pbLoading;
+    private NewsListContract.Presenter mPresenter;
 
 
     public static NewsListFragment newInstance(String source, String name){
@@ -63,7 +70,7 @@ public class NewsListFragment extends Fragment implements NewsQueryTask.IAsyncTa
     }
 
     public void update() {
-        loadData();
+//        loadData();
     }
 
     @Override
@@ -88,6 +95,7 @@ public class NewsListFragment extends Fragment implements NewsQueryTask.IAsyncTa
         pbLoading = (ProgressBar) layout.findViewById(R.id.pb_loading);
         RecyclerView rv = (RecyclerView) layout.findViewById(R.id.recyclerview);
         setupRecyclerView(rv);
+        mPresenter = new NewsListPresenter(this);
         return layout;
     }
 
@@ -106,13 +114,14 @@ public class NewsListFragment extends Fragment implements NewsQueryTask.IAsyncTa
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        loadData();
+//        loadData();
+        mPresenter.loadList(newsSource);
         pbLoading.setVisibility(View.VISIBLE);
     }
 
     private void loadData() {
         URL url = NetworkUtils.buildUrlForSource(newsSource, "top");
-        new NewsQueryTask(this, NewsListBean.class).execute(url);
+        new NewsQueryTask(this, NewsListBeanV1.class).execute(url);
     }
 
     @Override
@@ -125,10 +134,10 @@ public class NewsListFragment extends Fragment implements NewsQueryTask.IAsyncTa
         refreshLayout.setEnabled(true);
         refreshLayout.setRefreshing(false);
         Log.d("zjn", "done");
-        if (result instanceof NewsListBean) {
-            NewsListBean newsList = (NewsListBean) result;
+        if (result instanceof NewsListBeanV1) {
+            NewsListBeanV1 newsList = (NewsListBeanV1) result;
             if ("ok".equals(newsList.getStatus())) {
-                List<NewsListBean.ArticlesBean> articles = newsList.getArticles();
+                List<ArticlesBean> articles = newsList.getArticles();
                 if (articles != null && articles.size() > 0) {
                     mAdapter.updateList(newsList.getArticles());
                 }
@@ -148,13 +157,18 @@ public class NewsListFragment extends Fragment implements NewsQueryTask.IAsyncTa
         super.onDetach();
     }
 
+    @Override
+    public void renderList(HeadlinesBean headlinesBean) {
+        mAdapter.updateList(headlinesBean.getArticles());
+    }
+
 
     private static class NewsAdapter
             extends RecyclerView.Adapter<NewsAdapter.ViewHolder> {
 
         private final TypedValue mTypedValue = new TypedValue();
         private int mBackground;
-        private List<NewsListBean.ArticlesBean> mArticles;
+        private List<ArticlesBean> mArticles;
 
         public static class ViewHolder extends RecyclerView.ViewHolder {
 
@@ -175,13 +189,13 @@ public class NewsListFragment extends Fragment implements NewsQueryTask.IAsyncTa
 
         }
 
-        public NewsAdapter(Context context, List<NewsListBean.ArticlesBean> items) {
+        public NewsAdapter(Context context, List<ArticlesBean> items) {
 //            context.getTheme().resolveAttribute(R.attr.selectableItemBackground, mTypedValue, true);
 //            mBackground = mTypedValue.resourceId;
             mArticles = items;
         }
 
-        public void updateList(List<NewsListBean.ArticlesBean> articles) {
+        public void updateList(List<ArticlesBean> articles) {
             mArticles = articles;
             notifyDataSetChanged();
         }
@@ -196,7 +210,7 @@ public class NewsListFragment extends Fragment implements NewsQueryTask.IAsyncTa
 
         @Override
         public void onBindViewHolder(final ViewHolder holder, int position) {
-            final NewsListBean.ArticlesBean article = mArticles.get(position);
+            final ArticlesBean article = mArticles.get(position);
             holder.mTvTitle.setText(article.getTitle());
             holder.mTvDescription.setText(article.getDescription());
             holder.mTvPublishTime.setText(TimeUtils.convertTimeToString(article.getPublishedAt()));

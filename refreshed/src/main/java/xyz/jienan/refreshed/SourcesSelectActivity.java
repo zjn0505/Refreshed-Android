@@ -24,6 +24,8 @@ import java.net.URL;
 import java.util.List;
 import java.util.Set;
 
+import xyz.jienan.refreshed.network.NewsSourceBean;
+
 import static android.view.View.GONE;
 import static xyz.jienan.refreshed.NetworkUtils.NEWS_API_SOURCES_URL;
 
