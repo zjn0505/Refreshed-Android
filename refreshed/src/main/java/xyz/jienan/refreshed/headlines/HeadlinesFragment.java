@@ -99,6 +99,8 @@ public class HeadlinesFragment extends Fragment implements HeadlinesContract.Vie
 
     @Override
     public void renderSources(NewsSourceBean sources) {
+        pbLoading.setVisibility(GONE);
+        tabLayout.setVisibility(View.VISIBLE);
         filterBySourcesSelection(sources);
     }
 
@@ -181,8 +183,7 @@ public class HeadlinesFragment extends Fragment implements HeadlinesContract.Vie
             editor.putString("sources", json);
             editor.apply();
             if (result instanceof NewsSourceBean) {
-                pbLoading.setVisibility(GONE);
-                tabLayout.setVisibility(View.VISIBLE);
+
                 NewsSourceBean bean = (NewsSourceBean) result;
 
                 filterBySourcesSelection(bean);

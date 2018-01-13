@@ -1,9 +1,15 @@
 package xyz.jienan.refreshed.network;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+
+import java.io.File;
 import java.io.IOException;
 
 
 import io.reactivex.Observable;
+import okhttp3.Cache;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -17,6 +23,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Query;
 import retrofit2.http.Url;
 import xyz.jienan.refreshed.BuildConfig;
+import xyz.jienan.refreshed.base.RefreshedApplication;
 
 /**
  * Created by jienanzhang on 11/01/2018.
@@ -39,6 +46,35 @@ public class NetworkService {
             }
         });
 
+//        httpClientBuilder.addInterceptor(new Interceptor() {
+//            @Override
+//            public Response intercept(Chain chain) throws IOException {
+//                Response originalResponse = chain.proceed(chain.request());
+//                if (isNetworkAvailable(RefreshedApplication.getInstance())) {
+//                    int maxAge = 60; // read from cache for 1 minute
+//                    return originalResponse.newBuilder()
+//                            .header("Cache-Control", "public, max-age=" + maxAge)
+//                            .build();
+//                } else {
+//                    int maxStale = 60 * 60 * 24 * 28; // tolerate 4-weeks stale
+//                    return originalResponse.newBuilder()
+//                            .header("Cache-Control", "public, only-if-cached, max-stale=" + maxStale)
+//                            .build();
+//                }
+//            }
+//        });
+
+        httpClientBuilder.addNetworkInterceptor(new ResponseCacheInterceptor())
+                .addInterceptor(new OfflineResponseCacheInterceptor());
+
+        //setup cache
+        File httpCacheDirectory = new File(RefreshedApplication.getInstance().getCacheDir(), "responses");
+        int cacheSize = 10 * 1024 * 1024; // 10 MiB
+        Cache cache = new Cache(httpCacheDirectory, cacheSize);
+
+        //add cache to the client
+        httpClientBuilder.cache(cache);
+
         if (BuildConfig.DEBUG) {
             HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
             interceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
@@ -56,11 +92,71 @@ public class NetworkService {
         newsAPI = retrofit.create(NewsAPI.class);
     }
 
+
+    /**
+     * Interceptor to cache data and maintain it for four weeks.
+     *
+     * If the device is offline, stale (at most four weeks old)
+     * response is fetched from the cache.
+     */
+    private static class OfflineResponseCacheInterceptor implements Interceptor {
+        @Override
+        public okhttp3.Response intercept(Chain chain) throws IOException {
+            Request request = chain.request();
+            if (!isNetworkAvailable()) {
+                request = request.newBuilder()
+                        .removeHeader("pragma")
+                        .header("Cache-Control",
+                                "public, only-if-cached, max-stale=" + 2419200)
+                        .build();
+            }
+            return chain.proceed(request);
+        }
+    }
+
+    /**
+     * Interceptor to cache data and maintain it for a minute.
+     *
+     * If the same network request is sent within a minute,
+     * the response is retrieved from cache.
+     */
+    private static class ResponseCacheInterceptor implements Interceptor {
+        @Override
+        public okhttp3.Response intercept(Chain chain) throws IOException {
+            okhttp3.Response originalResponse = chain.proceed(chain.request());
+            return originalResponse.newBuilder()
+                    .removeHeader("pragma")
+                    .header("Cache-Control", "public, max-age=" + 60)
+                    .build();
+        }
+    }
+
+
     public static NewsAPI getNewsAPI() {
         if (newsAPI == null) {
             new NetworkService();
         }
         return newsAPI;
+    }
+
+
+    public static boolean isNetworkAvailable() {
+        Context context = RefreshedApplication.getInstance();
+        ConnectivityManager connectivity =(ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        if (connectivity == null) {
+            return false;
+        } else {
+            NetworkInfo[] info = connectivity.getAllNetworkInfo();
+            if (info != null) {
+                for (int i = 0; i < info.length; i++) {
+                    if (info[i].getState() == NetworkInfo.State.CONNECTED) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     public interface NewsAPI {

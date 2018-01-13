@@ -159,6 +159,9 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
 
     @Override
     public void renderList(HeadlinesBean headlinesBean) {
+        pbLoading.setVisibility(View.GONE);
+        refreshLayout.setEnabled(true);
+        refreshLayout.setRefreshing(false);
         mAdapter.updateList(headlinesBean.getArticles());
     }
 
