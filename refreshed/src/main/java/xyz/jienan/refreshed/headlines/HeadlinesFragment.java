@@ -20,6 +20,7 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
 import com.google.gson.Gson;
+import com.gturedi.views.StatefulLayout;
 
 import java.io.Serializable;
 import java.net.URL;
@@ -33,6 +34,7 @@ import xyz.jienan.refreshed.NewsQueryTask;
 import xyz.jienan.refreshed.network.NewsSourceBean;
 import xyz.jienan.refreshed.R;
 import xyz.jienan.refreshed.SourcesSelectActivity;
+import xyz.jienan.refreshed.news_list.INewsListFragmentListener;
 import xyz.jienan.refreshed.news_list.NewsListFragment;
 
 import static android.view.View.GONE;
@@ -44,33 +46,31 @@ import static xyz.jienan.refreshed.NetworkUtils.NEWS_API_SOURCES_URL;
 
 public class HeadlinesFragment extends Fragment implements HeadlinesContract.View {
 
-    private ProgressBar pbLoading;
     private Adapter adapter;
     private TabLayout tabLayout;
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
     private ViewPager viewPager;
     private HeadlinesContract.Presenter mPresenter;
+    private StatefulLayout stateful;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
         mPresenter = new HeadlinesPresenter(this);
-        View view = inflater.inflate(R.layout.fragment_refreshed, container, false);
-        viewPager = (ViewPager) view.findViewById(R.id.viewpager);
-        pbLoading = (ProgressBar) view.findViewById(R.id.pb_loading);
+        stateful = (StatefulLayout) inflater.inflate(R.layout.fragment_refreshed, container, false);
+        viewPager = stateful.findViewById(R.id.viewpager);
+        tabLayout = getActivity().findViewById(R.id.tabs);
         if (viewPager != null) {
             setupViewPager(viewPager);
         }
-        tabLayout = (TabLayout) getActivity().findViewById(R.id.tabs);
-        tabLayout.setupWithViewPager(viewPager);
         setHasOptionsMenu(true);
 //        querySources();
         mPresenter.loadSources();
         sharedPreferences = getActivity().getSharedPreferences("refreshed_source", Context.MODE_PRIVATE);
         editor = sharedPreferences.edit();
-        return view;
+        return stateful;
     }
 
     private void querySources() {
@@ -79,8 +79,29 @@ public class HeadlinesFragment extends Fragment implements HeadlinesContract.Vie
     }
 
     private void setupViewPager(ViewPager viewPager) {
+        tabLayout.setupWithViewPager(viewPager);
         adapter = new Adapter(getChildFragmentManager());
         viewPager.setAdapter(adapter);
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+                if (adapter != null) {
+                    int position = tab.getPosition();
+                    INewsListFragmentListener fragment = (INewsListFragmentListener) adapter.getItem(position);
+                    fragment.scrollTo(0);
+                }
+            }
+        });
     }
 
     private void addSourcesToAdapter(Set<String> sourceList) {
@@ -99,9 +120,22 @@ public class HeadlinesFragment extends Fragment implements HeadlinesContract.Vie
 
     @Override
     public void renderSources(NewsSourceBean sources) {
-        pbLoading.setVisibility(GONE);
-        tabLayout.setVisibility(View.VISIBLE);
-        filterBySourcesSelection(sources);
+        if (sources != null) {
+            if (sources.getSources() != null) {
+                stateful.showContent();
+                tabLayout.setVisibility(View.VISIBLE);
+                filterBySourcesSelection(sources);
+            }
+        } else {
+            stateful.showError(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mPresenter.loadSources();
+                    stateful.showLoading();
+                }
+            });
+        }
+
     }
 
     private class Adapter extends FragmentPagerAdapter {
@@ -127,7 +161,7 @@ public class HeadlinesFragment extends Fragment implements HeadlinesContract.Vie
 
         @Override
         public int getItemPosition(Object object) {
-            NewsListFragment fragment = (NewsListFragment) object;
+            INewsListFragmentListener fragment = (INewsListFragmentListener) object;
             if (fragment != null) {
                 fragment.update();
             }

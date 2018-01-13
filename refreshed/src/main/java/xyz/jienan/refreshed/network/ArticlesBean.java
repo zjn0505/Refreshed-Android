@@ -1,5 +1,10 @@
 package xyz.jienan.refreshed.network;
 
+import java.util.Comparator;
+import java.util.Date;
+
+import xyz.jienan.refreshed.TimeUtils;
+
 /**
  * Created by jienanzhang on 11/01/2018.
  */
@@ -15,7 +20,7 @@ public class ArticlesBean {
      * publishedAt : 2018-01-11T14:28:05Z
      */
 
-    private SourceBean source;
+    private NewsSourceBean source;
     private String author;
     private String title;
     private String description;
@@ -23,11 +28,11 @@ public class ArticlesBean {
     private String urlToImage;
     private String publishedAt;
 
-    public SourceBean getSource() {
+    public NewsSourceBean getSource() {
         return source;
     }
 
-    public void setSource(SourceBean source) {
+    public void setSource(NewsSourceBean source) {
         this.source = source;
     }
 
@@ -79,29 +84,16 @@ public class ArticlesBean {
         this.publishedAt = publishedAt;
     }
 
-    public static class SourceBean {
-        /**
-         * id : the-washington-post
-         * name : The Washington Post
-         */
 
-        private String id;
-        private String name;
-
-        public String getId() {
-            return id;
-        }
-
-        public void setId(String id) {
-            this.id = id;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
+    public static class ReleaseComparator implements Comparator<ArticlesBean> {
+        @Override
+        public int compare(ArticlesBean o1, ArticlesBean o2) {
+            Date d1 = TimeUtils.convertStringToDate(o1.getPublishedAt());
+            Date d2 = TimeUtils.convertStringToDate(o2.getPublishedAt());
+            if (d1 != null && d2 != null)
+                return d1.compareTo(d2);
+            else
+                return 0;
         }
     }
 }

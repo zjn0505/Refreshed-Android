@@ -31,33 +31,36 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.gturedi.views.StatefulLayout;
 import com.rohitarya.glide.facedetection.transformation.FaceCenterCrop;
+
+import java.io.Serializable;
+import java.net.URL;
+import java.util.Collections;
+import java.util.List;
 
 import xyz.jienan.refreshed.NetworkUtils;
 import xyz.jienan.refreshed.NewsQueryTask;
 import xyz.jienan.refreshed.R;
 import xyz.jienan.refreshed.TimeUtils;
+import xyz.jienan.refreshed.base.RefreshedApplication;
 import xyz.jienan.refreshed.network.ArticlesBean;
 import xyz.jienan.refreshed.network.HeadlinesBean;
 import xyz.jienan.refreshed.network.NewsListBeanV1;
 
-import java.io.Serializable;
-import java.net.URL;
-import java.util.List;
-
-public class NewsListFragment extends Fragment implements NewsListContract.View, NewsQueryTask.IAsyncTaskListener, SwipeRefreshLayout.OnRefreshListener {
+public class NewsListFragment extends Fragment implements NewsListContract.View, NewsQueryTask.IAsyncTaskListener, SwipeRefreshLayout.OnRefreshListener, INewsListFragmentListener {
 
     private SwipeRefreshLayout refreshLayout;
     private String newsSource;
+    private StatefulLayout stateful;
     private NewsAdapter mAdapter;
-    private ProgressBar pbLoading;
+    private RecyclerView rvNews;
     private NewsListContract.Presenter mPresenter;
+    private static boolean isGoogleServiceAvaliable = false;
 
 
     public static NewsListFragment newInstance(String source, String name){
@@ -66,11 +69,20 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
         args.putString("source", source);
         args.putString("name", name);
         newsListFragment.setArguments(args);
+        isGoogleServiceAvaliable = RefreshedApplication.getInstance().isGoogleServiceAvaliable;
         return newsListFragment;
     }
 
+    @Override
     public void update() {
 //        loadData();
+    }
+
+    @Override
+    public void scrollTo(int position) {
+        if (position >=0 && rvNews != null) {
+            rvNews.smoothScrollToPosition(position);
+        }
     }
 
     @Override
@@ -84,19 +96,18 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        FrameLayout layout = (FrameLayout)  inflater.inflate(
-                R.layout.fragment_cheese_list, container, false);
+        stateful = (StatefulLayout) inflater.inflate(
+                R.layout.fragment_news_list, container, false);
         if (savedInstanceState != null) {
             newsSource = savedInstanceState.getString("source");
         }
-        refreshLayout = (SwipeRefreshLayout) layout.findViewById(R.id.swipe_refresh_list);
+        refreshLayout = stateful.findViewById(R.id.swipe_refresh_list);
         refreshLayout.setOnRefreshListener(this);
         refreshLayout.setEnabled(false);
-        pbLoading = (ProgressBar) layout.findViewById(R.id.pb_loading);
-        RecyclerView rv = (RecyclerView) layout.findViewById(R.id.recyclerview);
-        setupRecyclerView(rv);
+        rvNews = stateful.findViewById(R.id.recyclerview);
+        setupRecyclerView(rvNews);
         mPresenter = new NewsListPresenter(this);
-        return layout;
+        return stateful;
     }
 
     @Override
@@ -115,8 +126,8 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 //        loadData();
-        mPresenter.loadList(newsSource);
-        pbLoading.setVisibility(View.VISIBLE);
+        mPresenter.loadList(newsSource, false);
+        stateful.showLoading();
     }
 
     private void loadData() {
@@ -130,7 +141,7 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
 
     @Override
     public void onPostExecute(Serializable result) {
-        pbLoading.setVisibility(View.GONE);
+        stateful.showContent();
         refreshLayout.setEnabled(true);
         refreshLayout.setRefreshing(false);
         Log.d("zjn", "done");
@@ -148,7 +159,8 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
     @Override
     public void onRefresh() {
         refreshLayout.setRefreshing(true);
-        loadData();
+        mPresenter.loadList(newsSource, true);
+//        loadData();
     }
 
     @Override
@@ -159,10 +171,26 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
 
     @Override
     public void renderList(HeadlinesBean headlinesBean) {
-        pbLoading.setVisibility(View.GONE);
-        refreshLayout.setEnabled(true);
-        refreshLayout.setRefreshing(false);
-        mAdapter.updateList(headlinesBean.getArticles());
+        if (headlinesBean != null) {
+            List<ArticlesBean> articles = headlinesBean.getArticles();
+            if (articles != null && articles.size() > 0) {
+                stateful.showContent();
+                refreshLayout.setEnabled(true);
+                refreshLayout.setRefreshing(false);
+                mAdapter.updateList(articles);
+            } else {
+                stateful.showEmpty();
+            }
+        } else {
+            stateful.showError(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mPresenter.loadList(newsSource, true);
+                    stateful.showLoading();
+                }
+            });
+        }
+
     }
 
 
@@ -172,6 +200,7 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
         private final TypedValue mTypedValue = new TypedValue();
         private int mBackground;
         private List<ArticlesBean> mArticles;
+        private Context mContext;
 
         public static class ViewHolder extends RecyclerView.ViewHolder {
 
@@ -195,11 +224,13 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
         public NewsAdapter(Context context, List<ArticlesBean> items) {
 //            context.getTheme().resolveAttribute(R.attr.selectableItemBackground, mTypedValue, true);
 //            mBackground = mTypedValue.resourceId;
+            mContext = context;
             mArticles = items;
         }
 
         public void updateList(List<ArticlesBean> articles) {
             mArticles = articles;
+            Collections.sort(mArticles, new ArticlesBean.ReleaseComparator());
             notifyDataSetChanged();
         }
 
@@ -232,10 +263,16 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
             if (TextUtils.isEmpty(imgUrl)) {
                 holder.mIvThumbnail.setVisibility(View.GONE);
             } else {
-                Glide.with(holder.mIvThumbnail.getContext())
-                        .load(article.getUrlToImage())
-                        .transform(new FaceCenterCrop())
-                        .into(holder.mIvThumbnail);
+                if (isGoogleServiceAvaliable) {
+                    Glide.with(holder.mIvThumbnail.getContext())
+                            .load(article.getUrlToImage())
+                            .transform(new FaceCenterCrop())
+                            .into(holder.mIvThumbnail);
+                } else {
+                    Glide.with(holder.mIvThumbnail.getContext())
+                            .load(article.getUrlToImage())
+                            .into(holder.mIvThumbnail);
+                }
             }
 
         }

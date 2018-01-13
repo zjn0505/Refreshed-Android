@@ -23,8 +23,10 @@ public class NewsListPresenter implements NewsListContract.Presenter {
     }
 
     @Override
-    public void loadList(String newsSource) {
-        Observable<HeadlinesBean> headlineObservable = NetworkService.getNewsAPI().getHeadLinesBySource(newsSource);
+    public void loadList(String newsSource, boolean bypassCache) {
+        NetworkService.NewsAPI newsAPI = NetworkService.getNewsAPI();
+        Observable<HeadlinesBean> headlineObservable = bypassCache ? newsAPI.getHeadLinesBySourceWithoutCache(newsSource)
+                : newsAPI.getHeadLinesBySource(newsSource);
         headlineObservable.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Observer<HeadlinesBean>() {
             @Override
             public void onSubscribe(Disposable d) {
@@ -38,7 +40,8 @@ public class NewsListPresenter implements NewsListContract.Presenter {
 
             @Override
             public void onError(Throwable e) {
-
+                mView.renderList(null);
+                e.printStackTrace();
             }
 
             @Override

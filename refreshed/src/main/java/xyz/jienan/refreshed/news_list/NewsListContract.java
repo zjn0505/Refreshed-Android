@@ -12,6 +12,6 @@ public class NewsListContract {
     }
 
     interface Presenter {
-        void loadList(String newsSource);
+        void loadList(String newsSource, boolean bypassCache);
     }
 }

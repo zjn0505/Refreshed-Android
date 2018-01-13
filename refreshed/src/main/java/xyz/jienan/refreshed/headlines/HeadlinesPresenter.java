@@ -37,7 +37,8 @@ public class HeadlinesPresenter implements HeadlinesContract.Presenter {
 
             @Override
             public void onError(Throwable e) {
-
+                mView.renderSources(null);
+                e.printStackTrace();
             }
 
             @Override

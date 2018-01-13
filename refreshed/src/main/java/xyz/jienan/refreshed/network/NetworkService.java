@@ -3,6 +3,7 @@ package xyz.jienan.refreshed.network;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.text.TextUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,6 +21,7 @@ import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.GET;
+import retrofit2.http.Headers;
 import retrofit2.http.Query;
 import retrofit2.http.Url;
 import xyz.jienan.refreshed.BuildConfig;
@@ -45,24 +47,6 @@ public class NetworkService {
                 return chain.proceed(request);
             }
         });
-
-//        httpClientBuilder.addInterceptor(new Interceptor() {
-//            @Override
-//            public Response intercept(Chain chain) throws IOException {
-//                Response originalResponse = chain.proceed(chain.request());
-//                if (isNetworkAvailable(RefreshedApplication.getInstance())) {
-//                    int maxAge = 60; // read from cache for 1 minute
-//                    return originalResponse.newBuilder()
-//                            .header("Cache-Control", "public, max-age=" + maxAge)
-//                            .build();
-//                } else {
-//                    int maxStale = 60 * 60 * 24 * 28; // tolerate 4-weeks stale
-//                    return originalResponse.newBuilder()
-//                            .header("Cache-Control", "public, only-if-cached, max-stale=" + maxStale)
-//                            .build();
-//                }
-//            }
-//        });
 
         httpClientBuilder.addNetworkInterceptor(new ResponseCacheInterceptor())
                 .addInterceptor(new OfflineResponseCacheInterceptor());
@@ -123,11 +107,15 @@ public class NetworkService {
     private static class ResponseCacheInterceptor implements Interceptor {
         @Override
         public okhttp3.Response intercept(Chain chain) throws IOException {
-            okhttp3.Response originalResponse = chain.proceed(chain.request());
-            return originalResponse.newBuilder()
-                    .removeHeader("pragma")
-                    .header("Cache-Control", "public, max-age=" + 60)
-                    .build();
+            Request request = chain.request();
+            String cacheable = request.header("cacheable");
+            okhttp3.Response originalResponse = chain.proceed(request);
+            Response.Builder builder = originalResponse.newBuilder().removeHeader("pragma").removeHeader("cacheable");
+            if (TextUtils.isEmpty(cacheable)) {
+                return builder.build();
+            } else {
+                return builder.header("Cache-Control", "public, max-age=" + cacheable).build();
+            }
         }
     }
 
@@ -149,8 +137,8 @@ public class NetworkService {
         } else {
             NetworkInfo[] info = connectivity.getAllNetworkInfo();
             if (info != null) {
-                for (int i = 0; i < info.length; i++) {
-                    if (info[i].getState() == NetworkInfo.State.CONNECTED) {
+                for (NetworkInfo anInfo : info) {
+                    if (anInfo.getState() == NetworkInfo.State.CONNECTED) {
                         return true;
                     }
                 }
@@ -162,22 +150,29 @@ public class NetworkService {
     public interface NewsAPI {
 
         // Headline section
+        @Headers("cacheable: 86400")
         @GET("top-headlines")
         Observable<HeadlinesBean> getHeadLinesBySource(@Query("sources") String sources);
 
+        @GET("top-headlines")
+        Observable<HeadlinesBean> getHeadLinesBySourceWithoutCache(@Query("sources") String sources);
 
         // Topic section
+        @Headers("cacheable: 60")
         @GET("top-headlines")
         Observable<ResponseBody> getHeadLinesByCountryAndCategory(@Query("country") String country, @Query("category") String category);
 
+        @Headers("cacheable: 60")
         @GET("everything?sortBy=relevancy")
         Observable<ResponseBody> getCustomQuery(@Query("q") String query, @Query("language") String language, @Query("from") String from);
 
         // Source selection
+        @Headers("cacheable: 86400")
         @GET("sources")
         Observable<NewsSourceBean> getSources(@Query("language") String language, @Query("country") String country);
 
 
+        @Headers("cacheable: 60")
         @GET
         Observable<ResponseBody> getFeatureImage(@Url String url);
         //"https://www.googleapis.com/customsearch/v1?key=%s&cx=%s&searchType=image&q=%s"
