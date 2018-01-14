@@ -11,25 +11,20 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.DesignDemo"
+        android:theme="@style/AppTheme"
         android:name=".base.RefreshedApplication">
         <activity
             android:name="xyz.jienan.refreshed.MainActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name"
+            android:theme="@style/Theme.DesignDemo">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="xyz.jienan.refreshed.CheeseDetailActivity"
-            android:parentActivityName="xyz.jienan.refreshed.MainActivity">
-            <meta-data android:name="android.support.PARENT_ACTIVITY"
-                android:value="xyz.jienan.refreshed.MainActivity" />
-        </activity>
 
-        <activity android:name="xyz.jienan.refreshed.SourcesSelectActivity"
-            android:theme="@style/AppTheme"/>
+        <activity android:name="xyz.jienan.refreshed.source_select.SourcesSelectActivity"/>
 
     </application>
 

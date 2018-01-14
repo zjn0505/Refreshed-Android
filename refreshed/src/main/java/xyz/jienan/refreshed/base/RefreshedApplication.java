@@ -5,6 +5,9 @@ import android.app.Application;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 
+import io.realm.Realm;
+import io.realm.RealmConfiguration;
+
 /**
  * Created by jienanzhang on 11/01/2018.
  */
@@ -22,6 +25,11 @@ public class RefreshedApplication extends Application {
         super.onCreate();
         mInstance = this;
         isGoogleServiceAvaliable = isGooglePlayServicesAvailable();
+        Realm.init(this);
+        RealmConfiguration config = new RealmConfiguration.Builder()
+                .name("news.realm")
+                .schemaVersion(0)
+                .build();
     }
 
     private boolean isGooglePlayServicesAvailable() {

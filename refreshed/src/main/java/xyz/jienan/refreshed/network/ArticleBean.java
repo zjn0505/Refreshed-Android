@@ -3,13 +3,17 @@ package xyz.jienan.refreshed.network;
 import java.util.Comparator;
 import java.util.Date;
 
+import io.realm.RealmObject;
+import io.realm.annotations.Ignore;
+import io.realm.annotations.PrimaryKey;
+import io.realm.annotations.Required;
 import xyz.jienan.refreshed.TimeUtils;
 
 /**
  * Created by jienanzhang on 11/01/2018.
  */
 
-public class ArticlesBean {
+public class ArticleBean extends RealmObject {
     /**
      * source : {"id":"the-washington-post","name":"The Washington Post"}
      * author : https://www.facebook.com/aaronblakewp?fref=ts
@@ -19,14 +23,23 @@ public class ArticlesBean {
      * urlToImage : https://www.washingtonpost.com/rf/image_1484w/2010-2019/Wires/Images/2017-09-29/Getty/855568760.jpg?t=20170517
      * publishedAt : 2018-01-11T14:28:05Z
      */
-
+    @Ignore
     private NewsSourceBean source;
+    @Ignore
     private String author;
+    @Ignore
     private String title;
+    @Ignore
     private String description;
+    @PrimaryKey
+    @Required
     private String url;
+    @Ignore
     private String urlToImage;
+    @Ignore
     private String publishedAt;
+
+    private int accessCount = 0;
 
     public NewsSourceBean getSource() {
         return source;
@@ -84,10 +97,18 @@ public class ArticlesBean {
         this.publishedAt = publishedAt;
     }
 
+    public int getAccessCount() {
+        return accessCount;
+    }
 
-    public static class ReleaseComparator implements Comparator<ArticlesBean> {
+    public void increaseAccessCount() {
+        accessCount++;
+    }
+
+
+    public static class ReleaseComparator implements Comparator<ArticleBean> {
         @Override
-        public int compare(ArticlesBean o1, ArticlesBean o2) {
+        public int compare(ArticleBean o1, ArticleBean o2) {
             Date d1 = TimeUtils.convertStringToDate(o1.getPublishedAt());
             Date d2 = TimeUtils.convertStringToDate(o2.getPublishedAt());
             if (d1 != null && d2 != null)

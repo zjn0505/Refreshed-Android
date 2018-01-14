@@ -17,28 +17,21 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ProgressBar;
 
-import com.google.gson.Gson;
 import com.gturedi.views.StatefulLayout;
 
-import java.io.Serializable;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
-import xyz.jienan.refreshed.NetworkUtils;
-import xyz.jienan.refreshed.NewsQueryTask;
-import xyz.jienan.refreshed.network.NewsSourceBean;
+import io.realm.Realm;
+import io.realm.RealmQuery;
+import io.realm.RealmResults;
 import xyz.jienan.refreshed.R;
-import xyz.jienan.refreshed.SourcesSelectActivity;
+import xyz.jienan.refreshed.source_select.SourcesSelectActivity;
+import xyz.jienan.refreshed.network.NewsSourceBean;
+import xyz.jienan.refreshed.network.NewsSourcesBean;
 import xyz.jienan.refreshed.news_list.INewsListFragmentListener;
 import xyz.jienan.refreshed.news_list.NewsListFragment;
-
-import static android.view.View.GONE;
-import static xyz.jienan.refreshed.NetworkUtils.NEWS_API_SOURCES_URL;
 
 /**
  * Created by jienanzhang on 17/07/2017.
@@ -53,6 +46,7 @@ public class HeadlinesFragment extends Fragment implements HeadlinesContract.Vie
     private ViewPager viewPager;
     private HeadlinesContract.Presenter mPresenter;
     private StatefulLayout stateful;
+    private Realm realm;
 
     @Nullable
     @Override
@@ -62,21 +56,18 @@ public class HeadlinesFragment extends Fragment implements HeadlinesContract.Vie
         stateful = (StatefulLayout) inflater.inflate(R.layout.fragment_refreshed, container, false);
         viewPager = stateful.findViewById(R.id.viewpager);
         tabLayout = getActivity().findViewById(R.id.tabs);
+        realm = Realm.getDefaultInstance();
         if (viewPager != null) {
             setupViewPager(viewPager);
         }
         setHasOptionsMenu(true);
-//        querySources();
         mPresenter.loadSources();
+        stateful.showLoading();
         sharedPreferences = getActivity().getSharedPreferences("refreshed_source", Context.MODE_PRIVATE);
         editor = sharedPreferences.edit();
         return stateful;
     }
 
-    private void querySources() {
-        URL url = NetworkUtils.buildUrl(NEWS_API_SOURCES_URL);
-        new NewsQueryTask(new SourceListener(), NewsSourceBean.class).execute(url);
-    }
 
     private void setupViewPager(ViewPager viewPager) {
         tabLayout.setupWithViewPager(viewPager);
@@ -104,13 +95,12 @@ public class HeadlinesFragment extends Fragment implements HeadlinesContract.Vie
         });
     }
 
-    private void addSourcesToAdapter(Set<String> sourceList) {
+    private void addSourcesToAdapter(List<NewsSourceBean> sourceList) {
 //        adapter.removeAllFragment();
-        for (String source : sourceList) {
-            String[] sourcesSplit = source.split("\\|");
-            NewsListFragment fragment = NewsListFragment.newInstance(sourcesSplit[0], sourcesSplit[1]);
+        for (NewsSourceBean source : sourceList) {
+            NewsListFragment fragment = NewsListFragment.newInstance(source.getId(), source.getName());
             Log.d("zjn", "sources added here " + source);
-            adapter.addFragment(fragment, sourcesSplit[1]);
+            adapter.addFragment(fragment, source.getName());
         }
         adapter.notifyDataSetChanged();
         viewPager.setCurrentItem(0);
@@ -119,13 +109,11 @@ public class HeadlinesFragment extends Fragment implements HeadlinesContract.Vie
     }
 
     @Override
-    public void renderSources(NewsSourceBean sources) {
-        if (sources != null) {
-            if (sources.getSources() != null) {
-                stateful.showContent();
-                tabLayout.setVisibility(View.VISIBLE);
-                filterBySourcesSelection(sources);
-            }
+    public void renderSources(List<NewsSourceBean> sourceList) {
+        if (sourceList != null && sourceList.size() > 0) {
+            stateful.showContent();
+            tabLayout.setVisibility(View.VISIBLE);
+            filterBySourcesSelection(sourceList);
         } else {
             stateful.showError(new View.OnClickListener() {
                 @Override
@@ -202,44 +190,14 @@ public class HeadlinesFragment extends Fragment implements HeadlinesContract.Vie
         return true;
     }
 
-    private class SourceListener implements NewsQueryTask.IAsyncTaskListener {
-
-        @Override
-        public void onPreExecute() {
-            tabLayout.setVisibility(View.GONE);
-        }
-
-        @Override
-        public void onPostExecute(Serializable result) {
-
-            Gson gson = new Gson();
-            String json = gson.toJson(result);
-            editor.putString("sources", json);
-            editor.apply();
-            if (result instanceof NewsSourceBean) {
-
-                NewsSourceBean bean = (NewsSourceBean) result;
-
-                filterBySourcesSelection(bean);
-            }
-        }
-    }
-
-    private void filterBySourcesSelection(NewsSourceBean bean) {
-        Set<String> selectedSet = sharedPreferences.getStringSet("selected_sources", null);
-        if (selectedSet == null) {
-            List<NewsSourceBean.SourcesBean> sourceList = bean.getSources().subList(0, 4);
-            Set<String> selectedSources = new HashSet();
-            for (NewsSourceBean.SourcesBean source : sourceList) {
-                String id = source.getId();
-                String name = source.getName();
-                selectedSources.add(id + "|" + name);
-            }
-            editor.putStringSet("selected_sources", selectedSources);
-            editor.commit();
-            addSourcesToAdapter(selectedSources);
+    private void filterBySourcesSelection(List<NewsSourceBean> sources) {
+        RealmQuery<NewsSourceBean> query = realm.where(NewsSourceBean.class);
+        if (query.count() == 0) {
+            List<NewsSourceBean> sourceList = sources.subList(0, 4); // TODO change to top 4 sources
+            addSourcesToAdapter(sourceList);
         } else {
-            addSourcesToAdapter(selectedSet);
+            RealmResults<NewsSourceBean> results = query.greaterThan("index", -1).findAll().sort("index");
+            addSourcesToAdapter(results.subList(0, results.size()));
         }
     }
 
@@ -247,15 +205,15 @@ public class HeadlinesFragment extends Fragment implements HeadlinesContract.Vie
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 1) {
-            Set<String> selectedSet = sharedPreferences.getStringSet("selected_sources", null);
-            if (selectedSet != null) {
-                addSourcesToAdapter(selectedSet);
-                getFragmentManager()
-                        .beginTransaction()
-                        .detach(HeadlinesFragment.this)
-                        .attach(HeadlinesFragment.this)
-                        .commit();
-            }
+            RealmQuery<NewsSourceBean> query = realm.where(NewsSourceBean.class);
+            RealmResults<NewsSourceBean> results = query.greaterThan("index", -1).findAll().sort("index");
+            addSourcesToAdapter(results.subList(0, results.size()));
+            getFragmentManager()
+                    .beginTransaction()
+                    .detach(HeadlinesFragment.this)
+                    .attach(HeadlinesFragment.this)
+                    .commit();
+
         }
     }
 }

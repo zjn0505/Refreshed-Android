@@ -22,7 +22,8 @@
             android:layout_width="match_parent"
             android:layout_height="200dp"
             android:adjustViewBounds="true"
-            android:scaleType="centerCrop"/>
+            android:scaleType="centerCrop"
+            android:layout_marginBottom="5dp"/>
 
         <TextView
             android:id="@+id/tv_title"
@@ -33,7 +34,10 @@
             android:maxLines="2"
             android:textAppearance="?attr/textAppearanceListItem"
             tools:text="This is the news title"
-            android:textStyle="bold" />
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="5dp"
+            android:text="?attr/colorPrimary"/>
 
         <TextView
             android:id="@+id/tv_description"
@@ -41,8 +45,10 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/tv_title"
             android:textAppearance="?attr/textAppearanceListItem"
-            android:textSize="15sp"
-            tools:text="this is the content of the news, this is the content of the news."/>
+            android:textSize="18sp"
+            tools:text="this is the content of the news, this is the content of the news."
+            android:layout_marginBottom="5dp"
+            android:text="?attr/colorPrimary"/>
 
 
         <TextView
@@ -50,7 +56,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/tv_description"
-            tools:text="123123123123"/>
+            tools:text="123123123123"
+            android:text="?attr/colorPrimary"/>
 
     </RelativeLayout>
 

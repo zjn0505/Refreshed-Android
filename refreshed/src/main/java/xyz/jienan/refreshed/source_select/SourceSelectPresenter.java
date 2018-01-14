@@ -1,4 +1,4 @@
-package xyz.jienan.refreshed.headlines;
+package xyz.jienan.refreshed.source_select;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,6 +10,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import io.realm.Realm;
+import io.realm.RealmQuery;
 import io.realm.RealmResults;
 import xyz.jienan.refreshed.network.NetworkService;
 import xyz.jienan.refreshed.network.NewsSourceBean;
@@ -19,13 +20,13 @@ import xyz.jienan.refreshed.network.NewsSourcesBean;
  * Created by jienanzhang on 11/01/2018.
  */
 
-public class HeadlinesPresenter implements HeadlinesContract.Presenter {
+public class SourceSelectPresenter implements SourceSelectContract.Presenter {
 
 
-    private HeadlinesContract.View mView;
+    private SourceSelectContract.View mView;
     private Realm realm;
 
-    public HeadlinesPresenter(HeadlinesContract.View view) {
+    public SourceSelectPresenter(SourceSelectContract.View view) {
         mView = view;
         realm = Realm.getDefaultInstance();
     }
@@ -49,7 +50,6 @@ public class HeadlinesPresenter implements HeadlinesContract.Presenter {
                 } else {
                     mView.renderSources(null);
                 }
-
             }
 
             @Override
@@ -66,6 +66,22 @@ public class HeadlinesPresenter implements HeadlinesContract.Presenter {
 
     }
 
+    @Override
+    public void changeSelection(String sourceId, final boolean wasSelected, final int position) {
+        final NewsSourceBean beanDB = realm.where(NewsSourceBean.class).equalTo("id", sourceId).findFirst();
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                if (wasSelected) {
+                    beanDB.setIndex(-1);
+                } else {
+                    beanDB.setIndex(position);
+                }
+                realm.insertOrUpdate(beanDB);
+            }
+        });
+    }
+
     private List<NewsSourceBean> applySourcesToRealm(List<NewsSourceBean> sourceList) {
         RealmResults<NewsSourceBean> result = realm.where(NewsSourceBean.class).greaterThan("index", -1).findAll();
         if (result.size() == 0) {
@@ -80,6 +96,5 @@ public class HeadlinesPresenter implements HeadlinesContract.Presenter {
         }
         Collections.sort(list, new NewsSourceBean.SourceIndexComparator());
         return list;
-
     }
 }

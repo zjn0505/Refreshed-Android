@@ -8,7 +8,6 @@ import android.text.TextUtils;
 import java.io.File;
 import java.io.IOException;
 
-
 import io.reactivex.Observable;
 import okhttp3.Cache;
 import okhttp3.Interceptor;
@@ -169,7 +168,7 @@ public class NetworkService {
         // Source selection
         @Headers("cacheable: 86400")
         @GET("sources")
-        Observable<NewsSourceBean> getSources(@Query("language") String language, @Query("country") String country);
+        Observable<NewsSourcesBean> getSources(@Query("language") String language, @Query("country") String country);
 
 
         @Headers("cacheable: 60")

@@ -17,8 +17,8 @@
 package xyz.jienan.refreshed.news_list;
 
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -26,7 +26,6 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,21 +37,18 @@ import com.bumptech.glide.Glide;
 import com.gturedi.views.StatefulLayout;
 import com.rohitarya.glide.facedetection.transformation.FaceCenterCrop;
 
-import java.io.Serializable;
-import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 
-import xyz.jienan.refreshed.NetworkUtils;
-import xyz.jienan.refreshed.NewsQueryTask;
+import io.realm.Realm;
 import xyz.jienan.refreshed.R;
 import xyz.jienan.refreshed.TimeUtils;
+import xyz.jienan.refreshed.WebUtils;
 import xyz.jienan.refreshed.base.RefreshedApplication;
-import xyz.jienan.refreshed.network.ArticlesBean;
+import xyz.jienan.refreshed.network.ArticleBean;
 import xyz.jienan.refreshed.network.HeadlinesBean;
-import xyz.jienan.refreshed.network.NewsListBeanV1;
 
-public class NewsListFragment extends Fragment implements NewsListContract.View, NewsQueryTask.IAsyncTaskListener, SwipeRefreshLayout.OnRefreshListener, INewsListFragmentListener {
+public class NewsListFragment extends Fragment implements NewsListContract.View, SwipeRefreshLayout.OnRefreshListener, INewsListFragmentListener {
 
     private SwipeRefreshLayout refreshLayout;
     private String newsSource;
@@ -61,7 +57,6 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
     private RecyclerView rvNews;
     private NewsListContract.Presenter mPresenter;
     private static boolean isGoogleServiceAvaliable = false;
-
 
     public static NewsListFragment newInstance(String source, String name){
         NewsListFragment newsListFragment = new NewsListFragment();
@@ -90,7 +85,6 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
         super.onCreate(savedInstanceState);
         Bundle args = getArguments();
         newsSource = args.getString("source");
-
     }
 
     @Nullable
@@ -125,42 +119,21 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-//        loadData();
         mPresenter.loadList(newsSource, false);
         stateful.showLoading();
     }
 
-    private void loadData() {
-        URL url = NetworkUtils.buildUrlForSource(newsSource, "top");
-        new NewsQueryTask(this, NewsListBeanV1.class).execute(url);
+    @Override
+    public void onResume() {
+        super.onResume();
+        mAdapter.notifyDataSetChanged();
     }
 
-    @Override
-    public void onPreExecute() {
-    }
-
-    @Override
-    public void onPostExecute(Serializable result) {
-        stateful.showContent();
-        refreshLayout.setEnabled(true);
-        refreshLayout.setRefreshing(false);
-        Log.d("zjn", "done");
-        if (result instanceof NewsListBeanV1) {
-            NewsListBeanV1 newsList = (NewsListBeanV1) result;
-            if ("ok".equals(newsList.getStatus())) {
-                List<ArticlesBean> articles = newsList.getArticles();
-                if (articles != null && articles.size() > 0) {
-                    mAdapter.updateList(newsList.getArticles());
-                }
-            }
-        }
-    }
 
     @Override
     public void onRefresh() {
         refreshLayout.setRefreshing(true);
         mPresenter.loadList(newsSource, true);
-//        loadData();
     }
 
     @Override
@@ -172,7 +145,7 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
     @Override
     public void renderList(HeadlinesBean headlinesBean) {
         if (headlinesBean != null) {
-            List<ArticlesBean> articles = headlinesBean.getArticles();
+            List<ArticleBean> articles = headlinesBean.getArticles();
             if (articles != null && articles.size() > 0) {
                 stateful.showContent();
                 refreshLayout.setEnabled(true);
@@ -199,8 +172,9 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
 
         private final TypedValue mTypedValue = new TypedValue();
         private int mBackground;
-        private List<ArticlesBean> mArticles;
+        private List<ArticleBean> mArticles;
         private Context mContext;
+        private Realm realm;
 
         public static class ViewHolder extends RecyclerView.ViewHolder {
 
@@ -221,16 +195,24 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
 
         }
 
-        public NewsAdapter(Context context, List<ArticlesBean> items) {
+        public NewsAdapter(Context context, List<ArticleBean> items) {
 //            context.getTheme().resolveAttribute(R.attr.selectableItemBackground, mTypedValue, true);
 //            mBackground = mTypedValue.resourceId;
             mContext = context;
             mArticles = items;
+            realm = Realm.getDefaultInstance();
         }
 
-        public void updateList(List<ArticlesBean> articles) {
+        public void updateList(List<ArticleBean> articles) {
             mArticles = articles;
-            Collections.sort(mArticles, new ArticlesBean.ReleaseComparator());
+            Collections.sort(mArticles, new ArticleBean.ReleaseComparator());
+            realm.beginTransaction();
+            for (ArticleBean articleBean : mArticles) {
+                if (realm.where(ArticleBean.class).equalTo("url", articleBean.getUrl()).count() == 0){
+                    realm.copyToRealm(articleBean);
+                }
+            }
+            realm.commitTransaction();
             notifyDataSetChanged();
         }
 
@@ -244,18 +226,35 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
 
         @Override
         public void onBindViewHolder(final ViewHolder holder, int position) {
-            final ArticlesBean article = mArticles.get(position);
+            final ArticleBean article = mArticles.get(position);
+            final ArticleBean articleDB = realm.where(ArticleBean.class).equalTo("url", article.getUrl()).findFirst();
             holder.mTvTitle.setText(article.getTitle());
             holder.mTvDescription.setText(article.getDescription());
             holder.mTvPublishTime.setText(TimeUtils.convertTimeToString(article.getPublishedAt()));
+            Resources resources = mContext.getResources();
+            if (articleDB.getAccessCount() > 0) {
+                int color = resources.getColor(R.color.textColorItemRead);
+                holder.mTvTitle.setTextColor(color);
+                holder.mTvDescription.setTextColor(color);
+                holder.mTvPublishTime.setTextColor(color);
+            } else {
+                int color = resources.getColor(R.color.textColorPrimary);
+                holder.mTvTitle.setTextColor(color);
+                holder.mTvDescription.setTextColor(color);
+                holder.mTvPublishTime.setTextColor(color);
+            }
 
             holder.mView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Context context = v.getContext();
-
-                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(article.getUrl()));
-                    context.startActivity(browserIntent);
+                    realm.executeTransaction(new Realm.Transaction() {
+                        @Override
+                        public void execute(Realm realm) {
+                            articleDB.increaseAccessCount();
+                            realm.insertOrUpdate(articleDB);
+                        }
+                    });
+                    WebUtils.openLink(v.getContext(), article.getUrl());
                 }
             });
 
