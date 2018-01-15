@@ -11,9 +11,10 @@ import xyz.jienan.refreshed.network.NewsSourceBean;
 public class SourceSelectContract {
     interface View {
         void renderSources(List<NewsSourceBean> sources);
+        void renderSourcesWithReorder(List<NewsSourceBean> sources, int from, int to);
     }
     interface Presenter {
         void loadSources();
-        void changeSelection(String sourceId, boolean wasSelected, int position);
+        void changeSelection(List<NewsSourceBean> sourceList, boolean wasSelected, int position);
     }
 }

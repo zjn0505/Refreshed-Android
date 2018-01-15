@@ -47,8 +47,8 @@ public class NetworkService {
             }
         });
 
-        httpClientBuilder.addNetworkInterceptor(new ResponseCacheInterceptor())
-                .addInterceptor(new OfflineResponseCacheInterceptor());
+        httpClientBuilder.addNetworkInterceptor(new NetworkCacheInterceptor())
+                .addInterceptor(new ApplicationCacheInterceptor());
 
         //setup cache
         File httpCacheDirectory = new File(RefreshedApplication.getInstance().getCacheDir(), "responses");
@@ -82,7 +82,7 @@ public class NetworkService {
      * If the device is offline, stale (at most four weeks old)
      * response is fetched from the cache.
      */
-    private static class OfflineResponseCacheInterceptor implements Interceptor {
+    private static class ApplicationCacheInterceptor implements Interceptor {
         @Override
         public okhttp3.Response intercept(Chain chain) throws IOException {
             Request request = chain.request();
@@ -92,6 +92,11 @@ public class NetworkService {
                         .header("Cache-Control",
                                 "public, only-if-cached, max-stale=" + 2419200)
                         .build();
+            }
+            String cacheable = request.header("cacheable");
+            if (TextUtils.isEmpty(cacheable) || cacheable.equals("0")) {
+                Request.Builder builder = request.newBuilder().addHeader("Cache-Control", "no-cache");
+                request =  builder.build();
             }
             return chain.proceed(request);
         }
@@ -103,7 +108,7 @@ public class NetworkService {
      * If the same network request is sent within a minute,
      * the response is retrieved from cache.
      */
-    private static class ResponseCacheInterceptor implements Interceptor {
+    private static class NetworkCacheInterceptor implements Interceptor {
         @Override
         public okhttp3.Response intercept(Chain chain) throws IOException {
             Request request = chain.request();

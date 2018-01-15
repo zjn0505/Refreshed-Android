@@ -262,6 +262,7 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
             if (TextUtils.isEmpty(imgUrl)) {
                 holder.mIvThumbnail.setVisibility(View.GONE);
             } else {
+                holder.mIvThumbnail.setVisibility(View.VISIBLE);
                 if (isGoogleServiceAvaliable) {
                     Glide.with(holder.mIvThumbnail.getContext())
                             .load(article.getUrlToImage())

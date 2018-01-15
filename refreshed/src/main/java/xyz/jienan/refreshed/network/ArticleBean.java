@@ -112,7 +112,7 @@ public class ArticleBean extends RealmObject {
             Date d1 = TimeUtils.convertStringToDate(o1.getPublishedAt());
             Date d2 = TimeUtils.convertStringToDate(o2.getPublishedAt());
             if (d1 != null && d2 != null)
-                return d1.compareTo(d2);
+                return d2.compareTo(d1);
             else
                 return 0;
         }

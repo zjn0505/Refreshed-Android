@@ -16,7 +16,7 @@ public class TimeUtils {
     private static final String REG_TIME_UTC_Z = "^\\d{4}-\\d{2}-\\d{2}[T]\\d{2}:\\d{2}:\\d{2}[Z]$"; // 2018-01-08T18:13:00Z
     private static final String REG_TIME_UTC = "^\\d{4}-\\d{2}-\\d{2}[T]\\d{2}:\\d{2}:\\d{2}$"; // 2018-01-08T18:13:00
     private static final String REG_TIME_UTC_PLUS = "^\\d{4}-\\d{2}-\\d{2}[T]\\d{2}:\\d{2}:\\d{2}[+]\\d{2}:\\d{2}$"; // 2018-01-08T18:13:00+00:00
-    private static final String REG_TIME_UTC_MICRO_Z = "^\\d{4}-\\d{2}-\\d{2}[T]\\d{2}:\\d{2}:\\d{2}[.]\\d{7,}[Z]$"; // 2018-01-12T21:07:02.2448015Z
+    private static final String REG_TIME_UTC_MICRO_Z = "^\\d{4}-\\d{2}-\\d{2}[T]\\d{2}:\\d{2}:\\d{2}[.]\\d{3,}[Z]$"; // 2018-01-12T21:07:02.2448015Z
 
     private static final String PATTERN_UTC_Z = "yyyy-MM-dd'T'HH:mm:ss'Z'";
     private static final String PATTERN_UTC = "yyyy-MM-dd'T'HH:mm:ss";

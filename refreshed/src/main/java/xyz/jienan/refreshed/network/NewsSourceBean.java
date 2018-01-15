@@ -12,6 +12,15 @@ import io.realm.annotations.PrimaryKey;
 
 public class NewsSourceBean extends RealmObject {
 
+
+    public NewsSourceBean() {
+
+    }
+
+    public NewsSourceBean(String id) {
+        this.id = id;
+    }
+
     /**
      * id : abc-news-au
      * name : ABC News (AU)
@@ -101,7 +110,25 @@ public class NewsSourceBean extends RealmObject {
 
         @Override
         public int compare(NewsSourceBean o1, NewsSourceBean o2) {
-            return o1.getIndex() - o2.getIndex();
+            int i1 = o1.getIndex();
+            int i2 = o2.getIndex();
+            if (i1 == -1 && i2 == -1) {
+                return 0;
+            } else if (i1 == -1) {
+                return 1;
+            } else if (i2 == -1) {
+                return -1;
+            } else {
+                return o1.getIndex() - o2.getIndex();
+            }
         }
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj != null && obj instanceof NewsSourceBean) {
+            return ((NewsSourceBean) obj).getId().equals(this.getId());
+        }
+        return false;
     }
 }
