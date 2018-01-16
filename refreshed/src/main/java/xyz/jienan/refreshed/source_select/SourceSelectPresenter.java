@@ -7,7 +7,6 @@ import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import io.realm.Realm;
 import xyz.jienan.refreshed.base.IDBManager;
 import xyz.jienan.refreshed.base.RealmManager;
 import xyz.jienan.refreshed.network.NetworkService;
@@ -67,6 +66,11 @@ public class SourceSelectPresenter implements SourceSelectContract.Presenter {
     public void changeSelection(List<NewsSourceBean> sourceList, final boolean wasSelected, final int position) {
         int toPosition = dbManger.updateIndex(sourceList, wasSelected, position);
         mView.renderSourcesWithReorder(dbManger.reorderByIndex(sourceList), position, toPosition);
+    }
+
+    @Override
+    public void loadThumbnails(List<String> names) {
+        NetworkService.getNewsAPI().getFeatureImage()
     }
 
 

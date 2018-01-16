@@ -176,9 +176,9 @@ public class NetworkService {
         Observable<NewsSourcesBean> getSources(@Query("language") String language, @Query("country") String country);
 
 
-        @Headers("cacheable: 60")
-        @GET
-        Observable<ResponseBody> getFeatureImage(@Url String url);
-        //"https://www.googleapis.com/customsearch/v1?key=%s&cx=%s&searchType=image&q=%s"
+        @Headers("cacheable: 86400")
+        @GET("https://api.qwant.com/api/search/images?count=10&offset=1&size=small")
+        Observable<ResponseBody> getFeatureImage(@Query("q") String query);
+        //https://api.qwant.com/api/search/images?count=10&offset=1&q=cnbc&size=small&t=images
     }
 }

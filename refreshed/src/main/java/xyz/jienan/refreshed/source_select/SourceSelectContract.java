@@ -16,5 +16,6 @@ public class SourceSelectContract {
     interface Presenter {
         void loadSources();
         void changeSelection(List<NewsSourceBean> sourceList, boolean wasSelected, int position);
+        void loadThumbnails(List<String> names);
     }
 }
