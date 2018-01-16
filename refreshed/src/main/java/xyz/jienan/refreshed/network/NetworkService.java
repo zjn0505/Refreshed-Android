@@ -93,8 +93,7 @@ public class NetworkService {
                                 "public, only-if-cached, max-stale=" + 2419200)
                         .build();
             }
-            String cacheable = request.header("cacheable");
-            if (TextUtils.isEmpty(cacheable) || cacheable.equals("0")) {
+            if ("1".equals(request.header("bypass"))) {
                 Request.Builder builder = request.newBuilder().addHeader("Cache-Control", "no-cache");
                 request =  builder.build();
             }
@@ -158,6 +157,7 @@ public class NetworkService {
         @GET("top-headlines")
         Observable<HeadlinesBean> getHeadLinesBySource(@Query("sources") String sources);
 
+        @Headers({"cacheable: 86400", "bypass: 1"})
         @GET("top-headlines")
         Observable<HeadlinesBean> getHeadLinesBySourceWithoutCache(@Query("sources") String sources);
 
