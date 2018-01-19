@@ -1,28 +1,21 @@
 package xyz.jienan.refreshed.source_select;
 
-import android.content.res.TypedArray;
-
 import org.json.JSONArray;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import io.reactivex.Observable;
-import io.reactivex.ObservableSource;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.BiFunction;
 import io.reactivex.functions.Function;
-import io.reactivex.internal.schedulers.NewThreadWorker;
 import io.reactivex.schedulers.Schedulers;
-import io.realm.Realm;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import xyz.jienan.refreshed.base.IDBManager;
 import xyz.jienan.refreshed.base.RealmManager;
-import xyz.jienan.refreshed.network.IconRequest;
 import xyz.jienan.refreshed.network.IconsBean;
 import xyz.jienan.refreshed.network.NetworkService;
 import xyz.jienan.refreshed.network.NewsSourceBean;
