@@ -1,6 +1,7 @@
 package xyz.jienan.refreshed.network;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.text.TextUtils;
@@ -13,14 +14,18 @@ import okhttp3.Cache;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.Headers;
+import retrofit2.http.POST;
+import retrofit2.http.Part;
 import retrofit2.http.Query;
 import retrofit2.http.Url;
 import xyz.jienan.refreshed.BuildConfig;
@@ -33,6 +38,7 @@ import xyz.jienan.refreshed.base.RefreshedApplication;
 public class NetworkService {
 
     private static final String HOST = "https://newsapi.org/v2/";
+    public static final String HOST_IMAGE_PROXY = "http://130.211.211.220:3002/images";
 
     private static NewsAPI newsAPI;
 
@@ -176,9 +182,9 @@ public class NetworkService {
         Observable<NewsSourcesBean> getSources(@Query("language") String language, @Query("country") String country);
 
 
-        @Headers("cacheable: 60")
-        @GET
-        Observable<ResponseBody> getFeatureImage(@Url String url);
-        //"https://www.googleapis.com/customsearch/v1?key=%s&cx=%s&searchType=image&q=%s"
+        @Headers({"cacheable: 60",
+                "Content-Type: application/json"})
+        @POST
+        Observable<IconsBean> getFeatureImage(@Url String url, @Body RequestBody body);
     }
 }

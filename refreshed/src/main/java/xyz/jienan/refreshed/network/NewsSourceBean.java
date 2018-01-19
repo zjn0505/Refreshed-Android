@@ -38,6 +38,7 @@ public class NewsSourceBean extends RealmObject {
     private String category;
     private String language;
     private String country;
+    private String imgUrl;
     private int index = -1;
 
     public String getId() {
@@ -96,13 +97,20 @@ public class NewsSourceBean extends RealmObject {
         this.country = country;
     }
 
-
     public int getIndex() {
         return index;
     }
 
     public void setIndex(int index) {
         this.index = index;
+    }
+
+    public String getImgUrl() {
+        return imgUrl;
+    }
+
+    public void setImgUrl(String imgUrl) {
+        this.imgUrl = imgUrl;
     }
 
     public static class SourceIndexComparator implements Comparator<NewsSourceBean> {

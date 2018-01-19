@@ -8,6 +8,12 @@
     android:clickable="true"
     android:focusable="true">
 
+    <ImageView
+        android:id="@+id/iv_icon"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerInside"/>
+
     <LinearLayout
         android:layout_width="0dp"
         android:layout_weight="1"

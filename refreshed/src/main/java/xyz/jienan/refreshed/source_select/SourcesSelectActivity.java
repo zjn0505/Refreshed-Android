@@ -1,5 +1,6 @@
 package xyz.jienan.refreshed.source_select;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -12,9 +13,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.gturedi.views.StatefulLayout;
 
 import java.util.List;
@@ -37,10 +40,12 @@ public class SourcesSelectActivity extends AppCompatActivity implements SourceSe
     private SourcesAdapter mAdapter;
     private SourceSelectContract.Presenter mPresenter;
     GridLayoutManager layoutManager;
+    private Context mContext;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mContext = this;
         setContentView(R.layout.activity_source_select);
         setTitle("Select Sources");
         mPresenter = new SourceSelectPresenter(this);
@@ -103,6 +108,7 @@ public class SourcesSelectActivity extends AppCompatActivity implements SourceSe
             public final TextView mTvName;
             public final TextView mTvDescription;
             public final CheckBox mCkbSelect;
+            public final ImageView mIvIcon;
 
             public ViewHolder(View view) {
                 super(view);
@@ -110,6 +116,7 @@ public class SourcesSelectActivity extends AppCompatActivity implements SourceSe
                 mTvName = (TextView) view.findViewById(R.id.tv_source_name);
                 mTvDescription = (TextView) view.findViewById(R.id.tv_source_description);
                 mCkbSelect = (CheckBox) view.findViewById(R.id.cbx_selected);
+                mIvIcon = (ImageView) view.findViewById(R.id.iv_icon);
             }
 
         }
@@ -154,7 +161,7 @@ public class SourcesSelectActivity extends AppCompatActivity implements SourceSe
                     mPresenter.changeSelection(sourceList, wasChecked, holder.getAdapterPosition());
                 }
             });
-
+            Glide.with(mContext).load(bean.getImgUrl()).into(holder.mIvIcon);
         }
 
         @Override
