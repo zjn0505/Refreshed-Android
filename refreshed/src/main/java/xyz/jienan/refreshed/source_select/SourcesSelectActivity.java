@@ -135,10 +135,13 @@ public class SourcesSelectActivity extends AppCompatActivity implements SourceSe
         public void updateList(List<NewsSourceBean> list, int from, int to) {
             sourceList = list;
             int visible = layoutManager.findFirstVisibleItemPosition();
-            int offset = layoutManager.getChildAt(visible).getTop();
+            View view = layoutManager.getChildAt(visible);
+            if (view != null) {
+                int offset = view.getTop();
+                layoutManager.scrollToPositionWithOffset(visible, offset);
+            }
             notifyItemMoved(from, to);
 
-            layoutManager.scrollToPositionWithOffset(visible, offset);
         }
 
         @Override
