@@ -164,7 +164,7 @@ public class SourcesSelectActivity extends AppCompatActivity implements SourceSe
                     mPresenter.changeSelection(sourceList, wasChecked, holder.getAdapterPosition());
                 }
             });
-            Glide.with(mContext).load(bean.getImgUrl()).into(holder.mIvIcon);
+            Glide.with(mContext).load(bean.getImgUrl()).fitCenter().into(holder.mIvIcon);
         }
 
         @Override
