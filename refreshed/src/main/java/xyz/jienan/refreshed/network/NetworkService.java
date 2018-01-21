@@ -1,7 +1,6 @@
 package xyz.jienan.refreshed.network;
 
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.text.TextUtils;
@@ -25,11 +24,13 @@ import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
-import retrofit2.http.Part;
 import retrofit2.http.Query;
 import retrofit2.http.Url;
 import xyz.jienan.refreshed.BuildConfig;
 import xyz.jienan.refreshed.base.RefreshedApplication;
+import xyz.jienan.refreshed.network.bean.HeadlinesBean;
+import xyz.jienan.refreshed.network.bean.IconsBean;
+import xyz.jienan.refreshed.network.bean.NewsSourcesBean;
 
 /**
  * Created by jienanzhang on 11/01/2018.

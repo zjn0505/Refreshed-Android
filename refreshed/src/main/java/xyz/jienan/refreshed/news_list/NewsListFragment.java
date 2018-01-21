@@ -18,7 +18,6 @@ package xyz.jienan.refreshed.news_list;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -45,8 +44,8 @@ import xyz.jienan.refreshed.R;
 import xyz.jienan.refreshed.TimeUtils;
 import xyz.jienan.refreshed.WebUtils;
 import xyz.jienan.refreshed.base.RefreshedApplication;
-import xyz.jienan.refreshed.network.ArticleBean;
-import xyz.jienan.refreshed.network.HeadlinesBean;
+import xyz.jienan.refreshed.network.bean.ArticleBean;
+import xyz.jienan.refreshed.network.bean.HeadlinesBean;
 
 public class NewsListFragment extends Fragment implements NewsListContract.View, SwipeRefreshLayout.OnRefreshListener, INewsListFragmentListener {
 

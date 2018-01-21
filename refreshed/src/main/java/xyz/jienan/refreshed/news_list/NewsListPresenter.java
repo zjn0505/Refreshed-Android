@@ -6,7 +6,7 @@ import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
-import xyz.jienan.refreshed.network.HeadlinesBean;
+import xyz.jienan.refreshed.network.bean.HeadlinesBean;
 import xyz.jienan.refreshed.network.NetworkService;
 
 /**

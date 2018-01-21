@@ -2,7 +2,7 @@ package xyz.jienan.refreshed.base;
 
 import java.util.List;
 
-import xyz.jienan.refreshed.network.NewsSourceBean;
+import xyz.jienan.refreshed.network.bean.NewsSourceBean;
 
 /**
  * Created by jienanzhang on 15/01/2018.

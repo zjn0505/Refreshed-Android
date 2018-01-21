@@ -1,4 +1,4 @@
-package xyz.jienan.refreshed.source_select;
+package xyz.jienan.refreshed.topics;
 
 import java.util.List;
 
@@ -8,13 +8,11 @@ import xyz.jienan.refreshed.network.bean.NewsSourceBean;
  * Created by jienanzhang on 11/01/2018.
  */
 
-public class SourceSelectContract {
+public class TopicContract {
     interface View {
         void renderSources(List<NewsSourceBean> sources);
-        void renderSourcesWithReorder(List<NewsSourceBean> sources, int from, int to);
     }
     interface Presenter {
         void loadSources();
-        void changeSelection(List<NewsSourceBean> sourceList, boolean wasSelected, int position);
     }
 }

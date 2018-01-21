@@ -5,7 +5,7 @@ import java.util.List;
 
 import io.realm.Realm;
 import io.realm.RealmResults;
-import xyz.jienan.refreshed.network.NewsSourceBean;
+import xyz.jienan.refreshed.network.bean.NewsSourceBean;
 
 /**
  * Created by jienanzhang on 15/01/2018.

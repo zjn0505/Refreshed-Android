@@ -1,4 +1,4 @@
-package xyz.jienan.refreshed.headlines;
+package xyz.jienan.refreshed.topics;
 
 import java.util.List;
 
@@ -17,13 +17,13 @@ import xyz.jienan.refreshed.network.bean.NewsSourcesBean;
  * Created by jienanzhang on 11/01/2018.
  */
 
-public class HeadlinesPresenter implements HeadlinesContract.Presenter {
+public class TopicPresenter implements TopicContract.Presenter {
 
 
-    private HeadlinesContract.View mView;
+    private TopicContract.View mView;
     private IDBManager dbManger;
 
-    public HeadlinesPresenter(HeadlinesContract.View view) {
+    public TopicPresenter(TopicContract.View view) {
         mView = view;
         dbManger = new RealmManager();
     }

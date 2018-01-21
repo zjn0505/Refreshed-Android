@@ -1,4 +1,4 @@
-package xyz.jienan.refreshed.network;
+package xyz.jienan.refreshed.network.bean;
 
 import java.util.Comparator;
 import java.util.Date;

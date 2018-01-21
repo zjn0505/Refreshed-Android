@@ -16,10 +16,10 @@ import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import xyz.jienan.refreshed.base.IDBManager;
 import xyz.jienan.refreshed.base.RealmManager;
-import xyz.jienan.refreshed.network.IconsBean;
+import xyz.jienan.refreshed.network.bean.IconsBean;
 import xyz.jienan.refreshed.network.NetworkService;
-import xyz.jienan.refreshed.network.NewsSourceBean;
-import xyz.jienan.refreshed.network.NewsSourcesBean;
+import xyz.jienan.refreshed.network.bean.NewsSourceBean;
+import xyz.jienan.refreshed.network.bean.NewsSourcesBean;
 
 import static xyz.jienan.refreshed.network.NetworkService.HOST_IMAGE_PROXY;
 

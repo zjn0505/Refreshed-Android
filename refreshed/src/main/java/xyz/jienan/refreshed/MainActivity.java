@@ -37,6 +37,7 @@ import android.view.View;
 import com.rohitarya.glide.facedetection.transformation.core.GlideFaceDetector;
 
 import xyz.jienan.refreshed.headlines.HeadlinesFragment;
+import xyz.jienan.refreshed.topics.TopicsFragment;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -157,9 +158,11 @@ public class MainActivity extends AppCompatActivity {
         Fragment fragment = null;
         Class fragmentClass = null;
         switch (menuItem.getItemId()) {
-            case R.id.nav_refreshed:
+            case R.id.nav_headlines:
                 fragmentClass = HeadlinesFragment.class;
                 break;
+            case R.id.nav_topics:
+                fragmentClass = TopicsFragment.class;
         }
         try {
             fragment = (Fragment) fragmentClass.newInstance();

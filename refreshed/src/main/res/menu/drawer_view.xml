@@ -18,13 +18,13 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_refreshed"
+            android:id="@+id/nav_headlines"
             android:icon="@drawable/ic_menu"
-            android:title="Refreshed" />
+            android:title="Headlines" />
         <item
-            android:id="@+id/nav_chuck"
+            android:id="@+id/nav_topics"
             android:icon="@drawable/ic_menu"
-            android:title="Chuck" />
+            android:title="Topics" />
         <item
             android:id="@+id/nav_friends"
             android:icon="@drawable/ic_menu"

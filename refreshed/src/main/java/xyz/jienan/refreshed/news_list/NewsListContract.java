@@ -1,6 +1,6 @@
 package xyz.jienan.refreshed.news_list;
 
-import xyz.jienan.refreshed.network.HeadlinesBean;
+import xyz.jienan.refreshed.network.bean.HeadlinesBean;
 
 /**
  * Created by jienanzhang on 11/01/2018.
