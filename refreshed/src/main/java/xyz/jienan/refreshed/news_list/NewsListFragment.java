@@ -52,6 +52,7 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
 
     private SwipeRefreshLayout refreshLayout;
     private String newsSource;
+    private String title;
     private StatefulLayout stateful;
     private NewsAdapter mAdapter;
     private RecyclerView rvNews;
@@ -69,8 +70,8 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
     }
 
     @Override
-    public void update() {
-//        loadData();
+    public String getFragmentName() {
+        return title;
     }
 
     @Override
@@ -85,6 +86,7 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
         super.onCreate(savedInstanceState);
         Bundle args = getArguments();
         newsSource = args.getString("source");
+        title = args.getString("name");
     }
 
     @Nullable
@@ -92,9 +94,7 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         stateful = (StatefulLayout) inflater.inflate(
                 R.layout.fragment_news_list, container, false);
-        if (savedInstanceState != null) {
-            newsSource = savedInstanceState.getString("source");
-        }
+        newsSource = getArguments().getString("source");
         refreshLayout = stateful.findViewById(R.id.swipe_refresh_list);
         refreshLayout.setOnRefreshListener(this);
         refreshLayout.setEnabled(false);
@@ -107,7 +107,7 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString("source", newsSource);
+//        outState.putString("source", newsSource);
     }
 
     private void setupRecyclerView(RecyclerView recyclerView) {

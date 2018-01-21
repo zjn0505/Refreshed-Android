@@ -12,7 +12,7 @@
     <string name="menu_night_mode_night">Night (always)</string>
     <string name="menu_night_mode_auto">Auto</string>
 
-
+    <string name="keep_at_least_one_source">Please keep at least one source</string>
 
 
 </resources>

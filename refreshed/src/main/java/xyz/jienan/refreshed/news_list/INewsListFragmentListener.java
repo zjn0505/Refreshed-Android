@@ -5,6 +5,6 @@ package xyz.jienan.refreshed.news_list;
  */
 
 public interface INewsListFragmentListener {
-    void update();
+    String getFragmentName();
     void scrollTo(int position);
 }

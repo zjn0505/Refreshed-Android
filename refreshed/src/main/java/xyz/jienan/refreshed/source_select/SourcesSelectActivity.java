@@ -159,6 +159,12 @@ public class SourcesSelectActivity extends AppCompatActivity implements SourceSe
             holder.mView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    if (holder.getAdapterPosition() == 0) {
+                        if (sourceList.size() > 1 && sourceList.get(1).getIndex() == -1) {
+                            Toast.makeText(mContext, getString(R.string.keep_at_least_one_source), Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                    }
                     final boolean wasChecked = holder.mCkbSelect.isChecked();
                     holder.mCkbSelect.setChecked(!wasChecked);
                     mPresenter.changeSelection(sourceList, wasChecked, holder.getAdapterPosition());

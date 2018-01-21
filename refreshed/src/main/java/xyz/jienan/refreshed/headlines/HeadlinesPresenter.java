@@ -46,7 +46,16 @@ public class HeadlinesPresenter implements HeadlinesContract.Presenter {
                 if (sources != null) {
                     List<NewsSourceBean> sourceList = sources.getSources();
                     if (sourceList != null && sourceList.size() > 0) {
-                        mView.renderSources(dbManger.reorderByIndex(sourceList));
+                        sourceList = dbManger.reorderByIndex(sourceList);
+                        int i = 0;
+                        for (NewsSourceBean bean : sourceList) {
+                            if (bean.getIndex() < 0) {
+                                break;
+                            }
+                            i++;
+                        }
+
+                        mView.renderSources(sourceList.subList(0, i));
                     }
                 } else {
                     mView.renderSources(null);
