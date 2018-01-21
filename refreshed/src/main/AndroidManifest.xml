@@ -15,7 +15,8 @@
         <activity
             android:name="xyz.jienan.refreshed.MainActivity"
             android:label="@string/app_name"
-            android:theme="@style/Theme.DesignDemo">
+            android:theme="@style/Theme.DesignDemo"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -23,7 +24,8 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="xyz.jienan.refreshed.source_select.SourcesSelectActivity"/>
+        <activity android:name="xyz.jienan.refreshed.source_select.SourcesSelectActivity"
+            android:screenOrientation="portrait"/>
 
     </application>
 

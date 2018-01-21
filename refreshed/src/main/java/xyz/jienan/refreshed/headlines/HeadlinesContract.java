@@ -2,7 +2,7 @@ package xyz.jienan.refreshed.headlines;
 
 import java.util.List;
 
-import xyz.jienan.refreshed.network.bean.NewsSourceBean;
+import xyz.jienan.refreshed.network.entity.NewsSourceBean;
 
 /**
  * Created by jienanzhang on 11/01/2018.

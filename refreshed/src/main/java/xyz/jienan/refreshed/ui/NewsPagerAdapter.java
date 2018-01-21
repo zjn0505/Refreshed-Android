@@ -7,7 +7,7 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import java.util.ArrayList;
 import java.util.List;
 
-import xyz.jienan.refreshed.network.bean.NewsSourceBean;
+import xyz.jienan.refreshed.network.entity.ITabEntity;
 import xyz.jienan.refreshed.news_list.INewsListFragmentListener;
 import xyz.jienan.refreshed.news_list.NewsListFragment;
 
@@ -16,7 +16,7 @@ import xyz.jienan.refreshed.news_list.NewsListFragment;
  */
 
 public class NewsPagerAdapter extends FragmentStatePagerAdapter {
-    private List<NewsSourceBean> sourceList = new ArrayList<>();
+    private List<? extends ITabEntity> sourceList = new ArrayList<>();
     private FragmentManager fm;
 
     public NewsPagerAdapter(FragmentManager fm) {
@@ -29,7 +29,7 @@ public class NewsPagerAdapter extends FragmentStatePagerAdapter {
         INewsListFragmentListener fragment = (INewsListFragmentListener) object;
         String title = fragment.getFragmentName();
 
-        for (NewsSourceBean source : sourceList) {
+        for (ITabEntity source : sourceList) {
             if (source.getName().equals(title)) {
                 return sourceList.indexOf(source);
             }
@@ -39,8 +39,8 @@ public class NewsPagerAdapter extends FragmentStatePagerAdapter {
 
     @Override
     public Fragment getItem(int position) {
-        NewsSourceBean source = sourceList.get(position);
-        NewsListFragment fragment = NewsListFragment.newInstance(source.getId(), source.getName());
+        ITabEntity source = sourceList.get(position);
+        NewsListFragment fragment = NewsListFragment.newInstance(source.getId(), source.getName(), source.getType());
         return fragment;
     }
 
@@ -51,11 +51,11 @@ public class NewsPagerAdapter extends FragmentStatePagerAdapter {
 
     @Override
     public CharSequence getPageTitle(int position) {
-        NewsSourceBean source = sourceList.get(position);
+        ITabEntity source = sourceList.get(position);
         return source.getName();
     }
 
-    public void updateSource(List<NewsSourceBean> sourceList) {
+    public void updateSource(List<? extends ITabEntity> sourceList) {
         this.sourceList = sourceList;
         notifyDataSetChanged();
     }

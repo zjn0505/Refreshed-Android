@@ -2,7 +2,8 @@ package xyz.jienan.refreshed.base;
 
 import java.util.List;
 
-import xyz.jienan.refreshed.network.bean.NewsSourceBean;
+import xyz.jienan.refreshed.network.entity.NewsSourceBean;
+import xyz.jienan.refreshed.network.entity.NewsTopicsRequest;
 
 /**
  * Created by jienanzhang on 15/01/2018.
@@ -19,4 +20,13 @@ public interface IDBManager {
      * @return the target position that the item will be moved to
      */
     int updateIndex(List<NewsSourceBean> sourceList, boolean wasSelected, int position);
+
+
+    /**
+     * @param withCandidates true - with topic
+     * @return
+     */
+    List<NewsTopicsRequest> getTopics(boolean withCandidates);
+
+    NewsTopicsRequest getTopicsRequest(String newsSource);
 }

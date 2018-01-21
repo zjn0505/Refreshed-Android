@@ -1,4 +1,4 @@
-package xyz.jienan.refreshed.network.bean;
+package xyz.jienan.refreshed.network.entity;
 
 import java.util.List;
 

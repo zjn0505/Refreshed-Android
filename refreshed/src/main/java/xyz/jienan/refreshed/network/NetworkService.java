@@ -28,9 +28,9 @@ import retrofit2.http.Query;
 import retrofit2.http.Url;
 import xyz.jienan.refreshed.BuildConfig;
 import xyz.jienan.refreshed.base.RefreshedApplication;
-import xyz.jienan.refreshed.network.bean.HeadlinesBean;
-import xyz.jienan.refreshed.network.bean.IconsBean;
-import xyz.jienan.refreshed.network.bean.NewsSourcesBean;
+import xyz.jienan.refreshed.network.entity.ArticlesBean;
+import xyz.jienan.refreshed.network.entity.IconsBean;
+import xyz.jienan.refreshed.network.entity.NewsSourcesBean;
 
 /**
  * Created by jienanzhang on 11/01/2018.
@@ -162,16 +162,21 @@ public class NetworkService {
         // Headline section
         @Headers("cacheable: 86400")
         @GET("top-headlines")
-        Observable<HeadlinesBean> getHeadLinesBySource(@Query("sources") String sources);
+        Observable<ArticlesBean> getHeadLinesBySource(@Query("sources") String sources);
 
         @Headers({"cacheable: 86400", "bypass: 1"})
         @GET("top-headlines")
-        Observable<HeadlinesBean> getHeadLinesBySourceWithoutCache(@Query("sources") String sources);
+        Observable<ArticlesBean> getHeadLinesBySourceWithoutCache(@Query("sources") String sources);
 
         // Topic section
-        @Headers("cacheable: 60")
+        @Headers("cacheable: 86400")
         @GET("top-headlines")
-        Observable<ResponseBody> getHeadLinesByCountryAndCategory(@Query("country") String country, @Query("category") String category);
+        Observable<ArticlesBean> getTopics(@Query("q") String query, @Query("category") String category);
+
+        // Topic section
+        @Headers({"cacheable: 86400", "bypass: 1"})
+        @GET("top-headlines")
+        Observable<ArticlesBean> getTopicsWithoutCache(@Query("q") String query, @Query("category") String category);
 
         @Headers("cacheable: 60")
         @GET("everything?sortBy=relevancy")

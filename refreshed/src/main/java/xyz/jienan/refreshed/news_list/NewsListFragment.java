@@ -1,19 +1,3 @@
-/*
- * Copyright (C) 2015 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package xyz.jienan.refreshed.news_list;
 
 import android.content.Context;
@@ -44,8 +28,8 @@ import xyz.jienan.refreshed.R;
 import xyz.jienan.refreshed.TimeUtils;
 import xyz.jienan.refreshed.WebUtils;
 import xyz.jienan.refreshed.base.RefreshedApplication;
-import xyz.jienan.refreshed.network.bean.ArticleBean;
-import xyz.jienan.refreshed.network.bean.HeadlinesBean;
+import xyz.jienan.refreshed.network.entity.ArticleBean;
+import xyz.jienan.refreshed.network.entity.ArticlesBean;
 
 public class NewsListFragment extends Fragment implements NewsListContract.View, SwipeRefreshLayout.OnRefreshListener, INewsListFragmentListener {
 
@@ -56,13 +40,15 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
     private NewsAdapter mAdapter;
     private RecyclerView rvNews;
     private NewsListContract.Presenter mPresenter;
+    private int type;
     private static boolean isGoogleServiceAvaliable = false;
 
-    public static NewsListFragment newInstance(String source, String name){
+    public static NewsListFragment newInstance(String source, String name, int type){
         NewsListFragment newsListFragment = new NewsListFragment();
         Bundle args = new Bundle();
         args.putString("source", source);
         args.putString("name", name);
+        args.putInt("type", type);
         newsListFragment.setArguments(args);
         isGoogleServiceAvaliable = RefreshedApplication.getInstance().isGoogleServiceAvaliable;
         return newsListFragment;
@@ -86,6 +72,7 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
         Bundle args = getArguments();
         newsSource = args.getString("source");
         title = args.getString("name");
+        type = args.getInt("type");
     }
 
     @Nullable
@@ -118,7 +105,7 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mPresenter.loadList(newsSource, false);
+        mPresenter.loadList(newsSource, type, false);
         stateful.showLoading();
     }
 
@@ -132,7 +119,7 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
     @Override
     public void onRefresh() {
         refreshLayout.setRefreshing(true);
-        mPresenter.loadList(newsSource, true);
+        mPresenter.loadList(newsSource, type, true);
     }
 
     @Override
@@ -142,9 +129,9 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
     }
 
     @Override
-    public void renderList(HeadlinesBean headlinesBean) {
-        if (headlinesBean != null) {
-            List<ArticleBean> articles = headlinesBean.getArticles();
+    public void renderList(ArticlesBean articlesBean) {
+        if (articlesBean != null) {
+            List<ArticleBean> articles = articlesBean.getArticles();
             if (articles != null && articles.size() > 0) {
                 stateful.showContent();
                 refreshLayout.setEnabled(true);
@@ -157,7 +144,7 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
             stateful.showError(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mPresenter.loadList(newsSource, true);
+                    mPresenter.loadList(newsSource, type, true);
                     stateful.showLoading();
                 }
             });
@@ -205,14 +192,17 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
         public void updateList(List<ArticleBean> articles) {
             mArticles = articles;
             Collections.sort(mArticles, new ArticleBean.ReleaseComparator());
-            realm.beginTransaction();
-            for (ArticleBean articleBean : mArticles) {
-                if (realm.where(ArticleBean.class).equalTo("url", articleBean.getUrl()).count() == 0){
-                    realm.copyToRealm(articleBean);
+            realm.executeTransaction(new Realm.Transaction() {
+                @Override
+                public void execute(Realm realm) {
+                    for (ArticleBean articleBean : mArticles) {
+                        if (realm.where(ArticleBean.class).equalTo("url", articleBean.getUrl()).count() == 0){
+                            realm.copyToRealm(articleBean);
+                        }
+                    }
+                    notifyDataSetChanged();
                 }
-            }
-            realm.commitTransaction();
-            notifyDataSetChanged();
+            });
         }
 
         @Override

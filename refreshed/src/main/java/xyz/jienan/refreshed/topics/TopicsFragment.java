@@ -15,7 +15,7 @@ import com.gturedi.views.StatefulLayout;
 import java.util.List;
 
 import xyz.jienan.refreshed.R;
-import xyz.jienan.refreshed.network.bean.NewsSourceBean;
+import xyz.jienan.refreshed.network.entity.NewsTopicsRequest;
 import xyz.jienan.refreshed.news_list.INewsListFragmentListener;
 import xyz.jienan.refreshed.ui.NewsPagerAdapter;
 
@@ -23,26 +23,26 @@ import xyz.jienan.refreshed.ui.NewsPagerAdapter;
  * Created by jienanzhang on 21/01/2018.
  */
 
-public class TopicsFragment extends Fragment implements TopicContract.View {
+public class TopicsFragment extends Fragment implements TopicsContract.View {
 
     private StatefulLayout stateful;
     private NewsPagerAdapter adapter;
     private TabLayout tabLayout;
     private ViewPager viewPager;
-    private TopicContract.Presenter mPresenter;
+    private TopicsContract.Presenter mPresenter;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        mPresenter = new TopicPresenter(this);
+        mPresenter = new TopicsPresenter(this);
         stateful = (StatefulLayout) inflater.inflate(R.layout.fragment_refreshed, container, false);
         viewPager = stateful.findViewById(R.id.viewpager);
         tabLayout = getActivity().findViewById(R.id.tabs);
         if (viewPager != null) {
             setupViewPager(viewPager);
         }
-        mPresenter.loadSources();
-        stateful.showLoading();
+        mPresenter.loadTopics(false);
+//        stateful.showLoading(); // TODO don't know why
         return stateful;
     }
 
@@ -72,23 +72,22 @@ public class TopicsFragment extends Fragment implements TopicContract.View {
         });
     }
 
-    private void addSourcesToAdapter(List<NewsSourceBean> sourceList) {
+    private void addTopicsToAdapter(List<NewsTopicsRequest> sourceList) {
         adapter.updateSource(sourceList);
         viewPager.setCurrentItem(0);
-
     }
 
     @Override
-    public void renderSources(List<NewsSourceBean> sourceList) {
+    public void renderTopics(List<NewsTopicsRequest> sourceList) {
         if (sourceList != null && sourceList.size() > 0) {
             stateful.showContent();
             tabLayout.setVisibility(View.VISIBLE);
-            addSourcesToAdapter(sourceList);
+            addTopicsToAdapter(sourceList);
         } else {
             stateful.showError(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-//                    mPresenter.loadSources();
+                    mPresenter.loadTopics(false);
                     stateful.showLoading();
                 }
             });

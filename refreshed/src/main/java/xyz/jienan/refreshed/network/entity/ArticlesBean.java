@@ -1,4 +1,4 @@
-package xyz.jienan.refreshed.network.bean;
+package xyz.jienan.refreshed.network.entity;
 
 import java.util.List;
 
@@ -6,7 +6,7 @@ import java.util.List;
  * Created by jienanzhang on 11/01/2018.
  */
 
-public class HeadlinesBean {
+public class ArticlesBean {
 
     /**
      * status : ok

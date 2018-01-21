@@ -1,15 +1,16 @@
-package xyz.jienan.refreshed.network.bean;
+package xyz.jienan.refreshed.network.entity;
 
 import java.util.Comparator;
 
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
+import xyz.jienan.refreshed.R;
 
 /**
  * Created by Jienan on 2017/7/24.
  */
 
-public class NewsSourceBean extends RealmObject {
+public class NewsSourceBean extends RealmObject implements ITabEntity {
 
 
     public NewsSourceBean() {
@@ -18,6 +19,12 @@ public class NewsSourceBean extends RealmObject {
 
     public NewsSourceBean(String id) {
         this.id = id;
+    }
+
+
+    @Override
+    public int getType() {
+        return R.integer.type_source;
     }
 
     /**

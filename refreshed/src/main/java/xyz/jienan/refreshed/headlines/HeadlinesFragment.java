@@ -18,7 +18,7 @@ import com.gturedi.views.StatefulLayout;
 import java.util.List;
 
 import xyz.jienan.refreshed.R;
-import xyz.jienan.refreshed.network.bean.NewsSourceBean;
+import xyz.jienan.refreshed.network.entity.NewsSourceBean;
 import xyz.jienan.refreshed.news_list.INewsListFragmentListener;
 import xyz.jienan.refreshed.source_select.SourcesSelectActivity;
 import xyz.jienan.refreshed.ui.NewsPagerAdapter;

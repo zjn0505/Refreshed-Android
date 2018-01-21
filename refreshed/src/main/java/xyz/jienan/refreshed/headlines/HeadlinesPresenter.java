@@ -10,8 +10,8 @@ import io.reactivex.schedulers.Schedulers;
 import xyz.jienan.refreshed.base.IDBManager;
 import xyz.jienan.refreshed.base.RealmManager;
 import xyz.jienan.refreshed.network.NetworkService;
-import xyz.jienan.refreshed.network.bean.NewsSourceBean;
-import xyz.jienan.refreshed.network.bean.NewsSourcesBean;
+import xyz.jienan.refreshed.network.entity.NewsSourceBean;
+import xyz.jienan.refreshed.network.entity.NewsSourcesBean;
 
 /**
  * Created by jienanzhang on 11/01/2018.

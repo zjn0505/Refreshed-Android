@@ -1,11 +1,14 @@
 package xyz.jienan.refreshed.base;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import io.realm.Realm;
 import io.realm.RealmResults;
-import xyz.jienan.refreshed.network.bean.NewsSourceBean;
+import xyz.jienan.refreshed.network.entity.NewsSourceBean;
+import xyz.jienan.refreshed.network.entity.NewsTopicsRequest;
 
 /**
  * Created by jienanzhang on 15/01/2018.
@@ -14,6 +17,7 @@ import xyz.jienan.refreshed.network.bean.NewsSourceBean;
 public class RealmManager implements IDBManager {
 
     private final static String[] RECOMMEND_SOURCES = new String[]{"ars-technica", "cnbc", "espn", "polygon"};
+    private final static String[] RECOMMEND_TOPICS = new String[]{"business", "entertainment", "general", "health", "science", "sports", "technology"};
 
     private Realm realm;
 
@@ -22,12 +26,15 @@ public class RealmManager implements IDBManager {
     }
 
     @Override
-    public List<NewsSourceBean> reorderByIndex(List<NewsSourceBean> sourceList) {
+    public List<NewsSourceBean> reorderByIndex(final List<NewsSourceBean> sourceList) {
         boolean hasValidSources = false;
         if (realm.where(NewsSourceBean.class).findAll().size() == 0) {
-            realm.beginTransaction();
-            realm.insert(sourceList);
-            realm.commitTransaction();
+            realm.executeTransaction(new Realm.Transaction() {
+                @Override
+                public void execute(Realm realm) {
+                    realm.insert(sourceList);
+                }
+            });
         } else {
             RealmResults<NewsSourceBean> result = realm.where(NewsSourceBean.class).greaterThan("index", -1).findAll().sort("index");
             if (result != null && result.size() != 0) {
@@ -105,5 +112,36 @@ public class RealmManager implements IDBManager {
             realm.commitTransaction();
         }
         return toPosition;
+    }
+
+    @Override
+    public List<NewsTopicsRequest> getTopics(boolean withCandidates) {
+        RealmResults queryResult = realm.where(NewsTopicsRequest.class).findAll();
+        if (queryResult.size() == 0) {
+            realm.executeTransaction(new Realm.Transaction() {
+                @Override
+                public void execute(Realm realm) {
+                    List<NewsTopicsRequest> recommendTopics = new ArrayList<>();
+                    for (int i = 0; i < RECOMMEND_TOPICS.length; i++) {
+                        NewsTopicsRequest topic = new NewsTopicsRequest();
+                        topic.setCategory(RECOMMEND_TOPICS[i]);
+                        topic.setQ(RECOMMEND_TOPICS[i]);
+                        topic.setIndex(i);
+                        recommendTopics.add(topic);
+                    }
+                    realm.insert(recommendTopics);
+                }
+            });
+        }
+        if (withCandidates) {
+            queryResult = queryResult.where().greaterThan("index", -1).findAll();
+        }
+
+        return queryResult.subList(0, queryResult.size());
+    }
+
+    @Override
+    public NewsTopicsRequest getTopicsRequest(String newsSource) {
+        return realm.where(NewsTopicsRequest.class).equalTo("q", newsSource).findFirst();
     }
 }

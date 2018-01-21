@@ -21,7 +21,7 @@ import com.gturedi.views.StatefulLayout;
 import java.util.List;
 
 import xyz.jienan.refreshed.R;
-import xyz.jienan.refreshed.network.bean.NewsSourceBean;
+import xyz.jienan.refreshed.network.entity.NewsSourceBean;
 import xyz.jienan.refreshed.ui.GridItemDecoration;
 
 /**
