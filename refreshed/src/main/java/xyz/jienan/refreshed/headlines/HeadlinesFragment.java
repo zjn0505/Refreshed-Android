@@ -107,7 +107,7 @@ public class HeadlinesFragment extends Fragment implements HeadlinesContract.Vie
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.menu_refreshed, menu);
+        inflater.inflate(R.menu.menu_headlines, menu);
         super.onCreateOptionsMenu(menu, inflater);
     }
 

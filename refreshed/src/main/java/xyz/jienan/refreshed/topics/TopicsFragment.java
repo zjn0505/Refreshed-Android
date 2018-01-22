@@ -1,5 +1,6 @@
 package xyz.jienan.refreshed.topics;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -7,6 +8,9 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -17,6 +21,7 @@ import java.util.List;
 import xyz.jienan.refreshed.R;
 import xyz.jienan.refreshed.network.entity.NewsTopicsRequest;
 import xyz.jienan.refreshed.news_list.INewsListFragmentListener;
+import xyz.jienan.refreshed.source_select.SourcesSelectActivity;
 import xyz.jienan.refreshed.ui.NewsPagerAdapter;
 
 /**
@@ -41,6 +46,7 @@ public class TopicsFragment extends Fragment implements TopicsContract.View {
         if (viewPager != null) {
             setupViewPager(viewPager);
         }
+        setHasOptionsMenu(true);
         mPresenter.loadTopics(false);
 //        stateful.showLoading(); // TODO don't know why
         return stateful;
@@ -71,6 +77,25 @@ public class TopicsFragment extends Fragment implements TopicsContract.View {
             }
         });
     }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_topics, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_search: {
+
+            }
+        }
+
+        return true;
+    }
+
+
 
     private void addTopicsToAdapter(List<NewsTopicsRequest> sourceList) {
         adapter.updateSource(sourceList);
