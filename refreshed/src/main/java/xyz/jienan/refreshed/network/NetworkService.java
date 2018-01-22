@@ -173,12 +173,12 @@ public class NetworkService {
 
         // Topic section
         @Headers("cacheable: 86400")
-        @GET("top-headlines")
+        @GET("top-headlines?country=us")
         Observable<ArticlesBean> getTopics(@Query("q") String query, @Query("category") String category);
 
         // Topic section
         @Headers({"cacheable: 86400", "bypass: 1"})
-        @GET("top-headlines")
+        @GET("top-headlines?country=us")
         Observable<ArticlesBean> getTopicsWithoutCache(@Query("q") String query, @Query("category") String category);
 
         @Headers("cacheable: 86400")

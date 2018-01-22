@@ -8,6 +8,7 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:3.0.1'
         classpath "io.realm:realm-gradle-plugin:4.3.1"
+        classpath 'com.google.gms:google-services:3.1.0'
     }
 }
 
@@ -29,4 +30,5 @@ ext {
     compileSdkVersion = 26
     buildToolsVersion = "26.0.2"
     supportLibVersion = "27.0.2"
+    googleLibVersion = "11.4.0"
 }

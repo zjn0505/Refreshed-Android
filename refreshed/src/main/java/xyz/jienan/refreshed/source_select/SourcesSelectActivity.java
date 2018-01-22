@@ -16,6 +16,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.gturedi.views.StatefulLayout;
 
 import java.util.List;
@@ -23,6 +24,8 @@ import java.util.List;
 import xyz.jienan.refreshed.R;
 import xyz.jienan.refreshed.network.entity.NewsSourceBean;
 import xyz.jienan.refreshed.ui.GridItemDecoration;
+
+import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
 
 /**
  * Created by Jienan on 2017/7/24.
@@ -167,11 +170,13 @@ public class SourcesSelectActivity extends AppCompatActivity implements SourceSe
                     setResult(RESULT_OK);
                 }
             });
+            RequestOptions myOptions = new RequestOptions()
+                    .fitCenter().placeholder(R.drawable.image_placeholder);
+
             Glide.with(mContext)
                     .load(bean.getImgUrl())
-                    .fitCenter()
-                    .placeholder(R.drawable.image_placeholder)
-                    .crossFade()
+                    .apply(myOptions)
+                    .transition(withCrossFade())
                     .into(holder.mIvIcon);
         }
 

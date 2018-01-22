@@ -34,10 +34,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.rohitarya.glide.facedetection.transformation.core.GlideFaceDetector;
-
 import xyz.jienan.refreshed.headlines.HeadlinesFragment;
 import xyz.jienan.refreshed.topics.TopicsFragment;
+import xyz.jienan.refreshed.ui.GlideFaceDetector;
 
 public class MainActivity extends AppCompatActivity {
 

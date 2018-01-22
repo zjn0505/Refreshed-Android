@@ -9,7 +9,6 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,8 +16,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.CenterCrop;
+import com.bumptech.glide.request.RequestOptions;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdSize;
+import com.google.android.gms.ads.AdView;
 import com.gturedi.views.StatefulLayout;
-import com.rohitarya.glide.facedetection.transformation.FaceCenterCrop;
 
 import java.util.Collections;
 import java.util.List;
@@ -30,6 +33,9 @@ import xyz.jienan.refreshed.WebUtils;
 import xyz.jienan.refreshed.base.RefreshedApplication;
 import xyz.jienan.refreshed.network.entity.ArticleBean;
 import xyz.jienan.refreshed.network.entity.ArticlesBean;
+import xyz.jienan.refreshed.ui.FaceCenterCrop;
+
+import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
 
 public class NewsListFragment extends Fragment implements NewsListContract.View, SwipeRefreshLayout.OnRefreshListener, INewsListFragmentListener {
 
@@ -169,8 +175,25 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
         private List<ArticleBean> mArticles;
         private Context mContext;
         private Realm realm;
+        private final static int AD_TYPE = 0;
+        private final static int CONTENT_TYPE = 1;
+        private final static int LIST_AD_DELTA = 10;
 
-        public static class ViewHolder extends RecyclerView.ViewHolder {
+        public class ViewHolder extends RecyclerView.ViewHolder {
+            private View view;
+
+            public ViewHolder(View view) {
+                super(view);
+                this.view = view;
+            }
+
+            public void bindType(ArticleBean bean) {
+                AdRequest adRequest = new AdRequest.Builder().build();
+                ((AdView)view).loadAd(adRequest);
+            }
+        }
+
+        public class ContentViewHolder extends ViewHolder {
 
             public final View mView;
             public final ImageView mIvThumbnail;
@@ -178,13 +201,65 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
             public final TextView mTvDescription;
             public final TextView mTvPublishTime;
 
-            public ViewHolder(View view) {
+            public ContentViewHolder(View view) {
                 super(view);
                 mView = view;
                 mIvThumbnail = (ImageView) view.findViewById(R.id.iv_thumbnails);
                 mTvTitle = (TextView) view.findViewById(R.id.tv_title);
                 mTvDescription = (TextView) view.findViewById(R.id.tv_description);
                 mTvPublishTime = (TextView) view.findViewById(R.id.tv_publish_time);
+            }
+
+            @Override
+            public void bindType(final ArticleBean article) {
+                final ArticleBean articleDB = realm.where(ArticleBean.class).equalTo("url", article.getUrl()).findFirst();
+                mTvTitle.setText(article.getTitle());
+                mTvDescription.setText(article.getDescription());
+                mTvPublishTime.setText(TimeUtils.convertTimeToString(article.getPublishedAt()));
+                Resources resources = mContext.getResources();
+                if (articleDB.getAccessCount() > 0) {
+                    int color = resources.getColor(R.color.textColorItemRead);
+                    mTvTitle.setTextColor(color);
+                    mTvDescription.setTextColor(color);
+                    mTvPublishTime.setTextColor(color);
+                } else {
+                    int color = resources.getColor(R.color.textColorPrimary);
+                    mTvTitle.setTextColor(color);
+                    mTvDescription.setTextColor(color);
+                    mTvPublishTime.setTextColor(color);
+                }
+
+                mView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        realm.executeTransaction(new Realm.Transaction() {
+                            @Override
+                            public void execute(Realm realm) {
+                                articleDB.increaseAccessCount();
+                                realm.insertOrUpdate(articleDB);
+                            }
+                        });
+                        WebUtils.openLink(v.getContext(), article.getUrl());
+                    }
+                });
+
+                String imgUrl = article.getUrlToImage();
+                if (TextUtils.isEmpty(imgUrl)) {
+                    mIvThumbnail.setVisibility(View.GONE);
+                } else {
+                    mIvThumbnail.setVisibility(View.VISIBLE);
+                    RequestOptions myOptions = new RequestOptions()
+                            .placeholder(R.drawable.image_placeholder);
+
+                    if (isGoogleServiceAvaliable)
+                        myOptions.transforms(new CenterCrop(), new FaceCenterCrop(mContext));
+
+                    Glide.with(mIvThumbnail.getContext())
+                            .load(article.getUrlToImage())
+                            .apply(myOptions)
+                            .transition(withCrossFade())
+                            .into(mIvThumbnail);
+                }
             }
         }
 
@@ -212,73 +287,48 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
         }
 
         @Override
+        public int getItemViewType(int position) {
+            if (position > 0 && position % LIST_AD_DELTA == 0)
+                return AD_TYPE;
+            return CONTENT_TYPE;
+        }
+
+        @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.list_item_3_3, parent, false);
-//            view.setBackgroundResource(mBackground);
-            return new ViewHolder(view);
+            if (viewType == CONTENT_TYPE) {
+                View view = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.list_item_3_3, parent, false);
+                return new ContentViewHolder(view);
+            } else if (viewType == AD_TYPE) {
+                AdView adView = new AdView(mContext);
+                adView.setAdSize(AdSize.SMART_BANNER);
+                adView.setAdUnitId("ca-app-pub-3940256099942544/6300978111");
+                return new ViewHolder(adView);
+            }
+            return null;
         }
 
         @Override
         public void onBindViewHolder(final ViewHolder holder, int position) {
-            final ArticleBean article = mArticles.get(position);
-            final ArticleBean articleDB = realm.where(ArticleBean.class).equalTo("url", article.getUrl()).findFirst();
-            holder.mTvTitle.setText(article.getTitle());
-            holder.mTvDescription.setText(article.getDescription());
-            holder.mTvPublishTime.setText(TimeUtils.convertTimeToString(article.getPublishedAt()));
-            Resources resources = mContext.getResources();
-            if (articleDB.getAccessCount() > 0) {
-                int color = resources.getColor(R.color.textColorItemRead);
-                holder.mTvTitle.setTextColor(color);
-                holder.mTvDescription.setTextColor(color);
-                holder.mTvPublishTime.setTextColor(color);
-            } else {
-                int color = resources.getColor(R.color.textColorPrimary);
-                holder.mTvTitle.setTextColor(color);
-                holder.mTvDescription.setTextColor(color);
-                holder.mTvPublishTime.setTextColor(color);
-            }
-
-            holder.mView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    realm.executeTransaction(new Realm.Transaction() {
-                        @Override
-                        public void execute(Realm realm) {
-                            articleDB.increaseAccessCount();
-                            realm.insertOrUpdate(articleDB);
-                        }
-                    });
-                    WebUtils.openLink(v.getContext(), article.getUrl());
-                }
-            });
-
-            String imgUrl = article.getUrlToImage();
-            if (TextUtils.isEmpty(imgUrl)) {
-                holder.mIvThumbnail.setVisibility(View.GONE);
-            } else {
-                holder.mIvThumbnail.setVisibility(View.VISIBLE);
-                if (isGoogleServiceAvaliable) {
-                    Glide.with(holder.mIvThumbnail.getContext())
-                            .load(article.getUrlToImage())
-                            .placeholder(R.drawable.image_placeholder)
-                            .transform(new FaceCenterCrop())
-                            .crossFade()
-                            .into(holder.mIvThumbnail);
-                } else {
-                    Glide.with(holder.mIvThumbnail.getContext())
-                            .load(article.getUrlToImage())
-                            .placeholder(R.drawable.image_placeholder)
-                            .crossFade()
-                            .into(holder.mIvThumbnail);
-                }
-            }
+            final ArticleBean article = mArticles.get(getRealPosition(position));
+            holder.bindType(article);
 
         }
 
         @Override
         public int getItemCount() {
-            return mArticles == null ? 0 : mArticles.size();
+            if (mArticles == null) {
+                return 0;
+            }
+            return mArticles.size() + (mArticles.size() / LIST_AD_DELTA);
+        }
+
+        private int getRealPosition(int position) {
+            if (LIST_AD_DELTA == 0) {
+                return position;
+            } else {
+                return position - position / LIST_AD_DELTA;
+            }
         }
     }
 }
