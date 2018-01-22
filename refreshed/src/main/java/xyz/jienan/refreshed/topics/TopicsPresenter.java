@@ -2,9 +2,18 @@ package xyz.jienan.refreshed.topics;
 
 import java.util.List;
 
+import io.reactivex.Observable;
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import xyz.jienan.refreshed.base.IDBManager;
 import xyz.jienan.refreshed.base.RealmManager;
+import xyz.jienan.refreshed.network.NetworkService;
 import xyz.jienan.refreshed.network.entity.NewsTopicsRequest;
+import xyz.jienan.refreshed.network.entity.TopicsSearchBean;
+
+import static xyz.jienan.refreshed.network.NetworkService.HOST_TOPICS_SEARCH;
 
 /**
  * Created by jienanzhang on 11/01/2018.
@@ -25,46 +34,31 @@ public class TopicsPresenter implements TopicsContract.Presenter {
     public void loadTopics(boolean withCandidates) {
         List<NewsTopicsRequest> topicsList = dbManger.getTopics(withCandidates);
         mView.renderTopics(topicsList);
-//        Observable<NewsSourcesBean> sourcesObservable = NetworkService.getNewsAPI().getSources("", "");
-//        sourcesObservable.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Observer<NewsSourcesBean>() {
-//            @Override
-//            public void onSubscribe(Disposable d) {
-//
-//            }
-//
-//            @Override
-//            public void onNext(NewsSourcesBean sources) {
-//                if (sources != null) {
-//                    List<NewsSourceBean> sourceList = sources.getSources();
-//                    if (sourceList != null && sourceList.size() > 0) {
-//                        sourceList = dbManger.reorderByIndex(sourceList);
-//                        int i = 0;
-//                        for (NewsSourceBean bean : sourceList) {
-//                            if (bean.getIndex() < 0) {
-//                                break;
-//                            }
-//                            i++;
-//                        }
-//
-//                        mView.renderTopics(sourceList.subList(0, i));
-//                    }
-//                } else {
-//                    mView.renderTopics(null);
-//                }
-//
-//            }
-//
-//            @Override
-//            public void onError(Throwable e) {
-//                mView.renderTopics(null);
-//                e.printStackTrace();
-//            }
-//
-//            @Override
-//            public void onComplete() {
-//
-//            }
-//        });
+    }
 
+    @Override
+    public void searchTopics(String query) {
+        Observable<List<TopicsSearchBean>> searchObservalbe = NetworkService.getNewsAPI().getTopicsSuggestions(HOST_TOPICS_SEARCH, query);
+        searchObservalbe.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Observer<List<TopicsSearchBean>>() {
+            @Override
+            public void onSubscribe(Disposable d) {
+
+            }
+
+            @Override
+            public void onNext(List<TopicsSearchBean> topicsSearchBeans) {
+                mView.renderTopicsSearch(topicsSearchBeans);
+            }
+
+            @Override
+            public void onError(Throwable e) {
+
+            }
+
+            @Override
+            public void onComplete() {
+
+            }
+        });
     }
 }

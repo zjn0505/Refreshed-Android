@@ -42,6 +42,7 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
     private NewsListContract.Presenter mPresenter;
     private int type;
     private static boolean isGoogleServiceAvaliable = false;
+    private boolean forceBypassCache = false;
 
     public static NewsListFragment newInstance(String source, String name, int type){
         NewsListFragment newsListFragment = new NewsListFragment();
@@ -51,6 +52,14 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
         args.putInt("type", type);
         newsListFragment.setArguments(args);
         isGoogleServiceAvaliable = RefreshedApplication.getInstance().isGoogleServiceAvaliable;
+        return newsListFragment;
+    }
+
+    public static NewsListFragment newInstance(String source, String name, int type, boolean forceBypassCache){
+        NewsListFragment newsListFragment = newInstance(source, name, type);
+        Bundle args = newsListFragment.getArguments();
+        args.putBoolean("forceBypassCache", forceBypassCache);
+        newsListFragment.setArguments(args);
         return newsListFragment;
     }
 
@@ -73,6 +82,7 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
         newsSource = args.getString("source");
         title = args.getString("name");
         type = args.getInt("type");
+        forceBypassCache = args.getBoolean("forceBypassCache", false);
     }
 
     @Nullable
@@ -105,7 +115,7 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mPresenter.loadList(newsSource, type, false);
+        mPresenter.loadList(newsSource, type, false || forceBypassCache);
         stateful.showLoading();
     }
 
@@ -156,8 +166,6 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
     private static class NewsAdapter
             extends RecyclerView.Adapter<NewsAdapter.ViewHolder> {
 
-        private final TypedValue mTypedValue = new TypedValue();
-        private int mBackground;
         private List<ArticleBean> mArticles;
         private Context mContext;
         private Realm realm;
@@ -178,12 +186,10 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
                 mTvDescription = (TextView) view.findViewById(R.id.tv_description);
                 mTvPublishTime = (TextView) view.findViewById(R.id.tv_publish_time);
             }
-
         }
 
         public NewsAdapter(Context context, List<ArticleBean> items) {
-//            context.getTheme().resolveAttribute(R.attr.selectableItemBackground, mTypedValue, true);
-//            mBackground = mTypedValue.resourceId;
+
             mContext = context;
             mArticles = items;
             realm = Realm.getDefaultInstance();
@@ -255,11 +261,15 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
                 if (isGoogleServiceAvaliable) {
                     Glide.with(holder.mIvThumbnail.getContext())
                             .load(article.getUrlToImage())
+                            .placeholder(R.drawable.image_placeholder)
                             .transform(new FaceCenterCrop())
+                            .crossFade()
                             .into(holder.mIvThumbnail);
                 } else {
                     Glide.with(holder.mIvThumbnail.getContext())
                             .load(article.getUrlToImage())
+                            .placeholder(R.drawable.image_placeholder)
+                            .crossFade()
                             .into(holder.mIvThumbnail);
                 }
             }

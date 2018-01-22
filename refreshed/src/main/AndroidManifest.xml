@@ -22,9 +22,14 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <meta-data android:name="android.app.searchable"
+                android:resource="@xml/searchable" />
         </activity>
 
         <activity android:name="xyz.jienan.refreshed.source_select.SourcesSelectActivity"
+            android:screenOrientation="portrait"/>
+
+        <activity android:name="xyz.jienan.refreshed.island.NewsIslandActivity"
             android:screenOrientation="portrait"/>
 
     </application>

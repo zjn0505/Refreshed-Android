@@ -1,25 +1,36 @@
 package xyz.jienan.refreshed.topics;
 
+import android.app.SearchManager;
+import android.content.Context;
 import android.content.Intent;
+import android.database.MatrixCursor;
 import android.os.Bundle;
+import android.provider.BaseColumns;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.CursorAdapter;
+import android.support.v4.widget.SimpleCursorAdapter;
+import android.support.v7.widget.SearchView;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 
 import com.gturedi.views.StatefulLayout;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import xyz.jienan.refreshed.R;
+import xyz.jienan.refreshed.island.NewsIslandActivity;
 import xyz.jienan.refreshed.network.entity.NewsTopicsRequest;
+import xyz.jienan.refreshed.network.entity.TopicsSearchBean;
 import xyz.jienan.refreshed.news_list.INewsListFragmentListener;
 import xyz.jienan.refreshed.source_select.SourcesSelectActivity;
 import xyz.jienan.refreshed.ui.NewsPagerAdapter;
@@ -35,6 +46,10 @@ public class TopicsFragment extends Fragment implements TopicsContract.View {
     private TabLayout tabLayout;
     private ViewPager viewPager;
     private TopicsContract.Presenter mPresenter;
+    private CursorAdapter searchAdapter;
+    private List<TopicsSearchBean> searchSuggestions = new ArrayList<>();
+    private final static int REQ_ISLAND_ACTIVITY = 101;
+
 
     @Nullable
     @Override
@@ -79,8 +94,56 @@ public class TopicsFragment extends Fragment implements TopicsContract.View {
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+    public void onCreateOptionsMenu(Menu menu, final MenuInflater inflater) {
         inflater.inflate(R.menu.menu_topics, menu);
+        SearchManager searchManager = (SearchManager) getActivity().getSystemService(Context.SEARCH_SERVICE);
+
+        final SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+        searchView.setQueryHint(getString(R.string.search_hint));
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getActivity().getComponentName()));
+        if (searchAdapter == null) {
+            searchAdapter = new SimpleCursorAdapter(
+                    getActivity(),
+                    android.R.layout.simple_list_item_2,
+                    null,
+                    new String[]{SearchManager.SUGGEST_COLUMN_TEXT_1, SearchManager.SUGGEST_COLUMN_TEXT_2},
+                    new int[]{android.R.id.text1, android.R.id.text2},
+                    0
+            );
+        }
+        searchView.setSuggestionsAdapter(searchAdapter);
+        searchView.setOnSuggestionListener(new SearchView.OnSuggestionListener() {
+            @Override
+            public boolean onSuggestionSelect(int position) {
+                return false;
+            }
+
+            @Override
+            public boolean onSuggestionClick(int position) {
+                String topic = searchSuggestions.get(position).getTitle();
+                searchView.setQuery(topic, true);
+                searchView.clearFocus();
+                Intent intent = new Intent(getActivity(), NewsIslandActivity.class);
+                intent.putExtra("source", topic);
+                startActivityForResult(intent, REQ_ISLAND_ACTIVITY);
+                return true;
+            }
+        });
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                Intent intent = new Intent(getActivity(), NewsIslandActivity.class);
+                intent.putExtra("source", query);
+                startActivityForResult(intent, REQ_ISLAND_ACTIVITY);
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                mPresenter.searchTopics(newText);
+                return true;
+            }
+        });
         super.onCreateOptionsMenu(menu, inflater);
     }
 
@@ -88,14 +151,11 @@ public class TopicsFragment extends Fragment implements TopicsContract.View {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_search: {
-
             }
         }
 
         return true;
     }
-
-
 
     private void addTopicsToAdapter(List<NewsTopicsRequest> sourceList) {
         adapter.updateSource(sourceList);
@@ -117,6 +177,22 @@ public class TopicsFragment extends Fragment implements TopicsContract.View {
                 }
             });
         }
+    }
 
+    @Override
+    public void renderTopicsSearch(List<TopicsSearchBean> topics) {
+        searchSuggestions = topics;
+        String[] columns = { BaseColumns._ID,
+                SearchManager.SUGGEST_COLUMN_TEXT_1,
+                SearchManager.SUGGEST_COLUMN_TEXT_2,
+                SearchManager.SUGGEST_COLUMN_INTENT_DATA,
+        };
+        MatrixCursor cursor = new MatrixCursor(columns);
+        for (int i = 0; i < searchSuggestions.size(); i++) {
+            TopicsSearchBean topic = searchSuggestions.get(i);
+            String[] tmp = {Integer.toString(i), topic.getTitle(),topic.getType(), topic.getTitle()};
+            cursor.addRow(tmp);
+        }
+        searchAdapter.swapCursor(cursor);
     }
 }

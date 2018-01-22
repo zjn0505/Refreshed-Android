@@ -22,7 +22,9 @@ public class NewsTopicsRequest extends RealmObject implements ITabEntity {
 
     private String category;
 
-    private String country;
+    private String country = "us";
+
+    private String language = "en";
 
     private int index = -1;
 
@@ -66,6 +68,14 @@ public class NewsTopicsRequest extends RealmObject implements ITabEntity {
 
     public void setIndex(int index) {
         this.index = index;
+    }
+
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
     }
 
     public static class TopicIndexComparator implements Comparator<NewsTopicsRequest> {

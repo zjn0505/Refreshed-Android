@@ -167,7 +167,12 @@ public class SourcesSelectActivity extends AppCompatActivity implements SourceSe
                     setResult(RESULT_OK);
                 }
             });
-            Glide.with(mContext).load(bean.getImgUrl()).fitCenter().into(holder.mIvIcon);
+            Glide.with(mContext)
+                    .load(bean.getImgUrl())
+                    .fitCenter()
+                    .placeholder(R.drawable.image_placeholder)
+                    .crossFade()
+                    .into(holder.mIvIcon);
         }
 
         @Override

@@ -7,6 +7,7 @@ import android.text.TextUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import io.reactivex.Observable;
 import okhttp3.Cache;
@@ -31,6 +32,7 @@ import xyz.jienan.refreshed.base.RefreshedApplication;
 import xyz.jienan.refreshed.network.entity.ArticlesBean;
 import xyz.jienan.refreshed.network.entity.IconsBean;
 import xyz.jienan.refreshed.network.entity.NewsSourcesBean;
+import xyz.jienan.refreshed.network.entity.TopicsSearchBean;
 
 /**
  * Created by jienanzhang on 11/01/2018.
@@ -40,6 +42,7 @@ public class NetworkService {
 
     private static final String HOST = "https://newsapi.org/v2/";
     public static final String HOST_IMAGE_PROXY = "http://130.211.211.220:3002/images";
+    public static final String HOST_TOPICS_SEARCH = "http://130.211.211.220:3002/topic";
 
     private static NewsAPI newsAPI;
 
@@ -178,9 +181,13 @@ public class NetworkService {
         @GET("top-headlines")
         Observable<ArticlesBean> getTopicsWithoutCache(@Query("q") String query, @Query("category") String category);
 
-        @Headers("cacheable: 60")
+        @Headers("cacheable: 86400")
         @GET("everything?sortBy=relevancy")
-        Observable<ResponseBody> getCustomQuery(@Query("q") String query, @Query("language") String language, @Query("from") String from);
+        Observable<ArticlesBean> getCustomQuery(@Query("q") String query, @Query("language") String language, @Query("from") String from);
+
+        @Headers({"cacheable: 86400", "bypass: 1"})
+        @GET("everything?sortBy=relevancy")
+        Observable<ArticlesBean> getCustomQueryWithoutCache(@Query("q") String query, @Query("language") String language, @Query("from") String from);
 
         // Source selection
         @Headers("cacheable: 86400")
@@ -192,5 +199,9 @@ public class NetworkService {
                 "Content-Type: application/json"})
         @POST
         Observable<IconsBean> getFeatureImage(@Url String url, @Body RequestBody body);
+
+        @Headers("cacheable: 60")
+        @GET
+        Observable<List<TopicsSearchBean>> getTopicsSuggestions(@Url String url, @Query("q") String query);
     }
 }
