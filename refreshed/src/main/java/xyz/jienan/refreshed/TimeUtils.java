@@ -1,5 +1,6 @@
 package xyz.jienan.refreshed;
 
+import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -29,12 +30,14 @@ public class TimeUtils {
 
 
     public static String convertTimeToString(String utcTime) {
-        return utcTime;
+        Date date = convertStringToDate(utcTime);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        return sdf.format(date);
     }
 
     public static Date convertStringToDate(String time) {
         SimpleDateFormat sdf = parseTime(time);
-        sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
         try {
             Date date = sdf.parse(time);
             return date;

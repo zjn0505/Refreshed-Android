@@ -27,15 +27,18 @@ import java.util.Collections;
 import java.util.List;
 
 import io.realm.Realm;
+import xyz.jienan.refreshed.MetaUtils;
 import xyz.jienan.refreshed.R;
 import xyz.jienan.refreshed.TimeUtils;
 import xyz.jienan.refreshed.WebUtils;
+import xyz.jienan.refreshed.base.AdsManager;
 import xyz.jienan.refreshed.base.RefreshedApplication;
 import xyz.jienan.refreshed.network.entity.ArticleBean;
 import xyz.jienan.refreshed.network.entity.ArticlesBean;
 import xyz.jienan.refreshed.ui.FaceCenterCrop;
 
 import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
+import static xyz.jienan.refreshed.MetaUtils.ADMOD_LIST_INSERT_ADS_UNIT_ID;
 
 public class NewsListFragment extends Fragment implements NewsListContract.View, SwipeRefreshLayout.OnRefreshListener, INewsListFragmentListener {
 
@@ -188,8 +191,7 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
             }
 
             public void bindType(ArticleBean bean) {
-                AdRequest adRequest = new AdRequest.Builder().build();
-                ((AdView)view).loadAd(adRequest);
+
             }
         }
 
@@ -302,7 +304,9 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
             } else if (viewType == AD_TYPE) {
                 AdView adView = new AdView(mContext);
                 adView.setAdSize(AdSize.SMART_BANNER);
-                adView.setAdUnitId("ca-app-pub-3940256099942544/6300978111");
+                adView.setAdUnitId(AdsManager.getAdsUnitId(ADMOD_LIST_INSERT_ADS_UNIT_ID));
+                AdRequest adRequest = new AdRequest.Builder().build();
+                adView.loadAd(adRequest);
                 return new ViewHolder(adView);
             }
             return null;

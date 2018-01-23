@@ -28,11 +28,14 @@ import retrofit2.http.POST;
 import retrofit2.http.Query;
 import retrofit2.http.Url;
 import xyz.jienan.refreshed.BuildConfig;
+import xyz.jienan.refreshed.MetaUtils;
 import xyz.jienan.refreshed.base.RefreshedApplication;
 import xyz.jienan.refreshed.network.entity.ArticlesBean;
 import xyz.jienan.refreshed.network.entity.IconsBean;
 import xyz.jienan.refreshed.network.entity.NewsSourcesBean;
 import xyz.jienan.refreshed.network.entity.TopicsSearchBean;
+
+import static xyz.jienan.refreshed.MetaUtils.NEWSAPI_API_KEY;
 
 /**
  * Created by jienanzhang on 11/01/2018.
@@ -52,7 +55,7 @@ public class NetworkService {
             @Override
             public Response intercept(Chain chain) throws IOException {
                 Request request = chain.request().newBuilder()
-                        .header("X-Api-Key", "2a2736d38cc8461daf7af2a80f2e0ffe").build();
+                        .header("X-Api-Key", MetaUtils.getMeta(NEWSAPI_API_KEY)).build();
                 return chain.proceed(request);
             }
         });
@@ -195,12 +198,12 @@ public class NetworkService {
         Observable<NewsSourcesBean> getSources(@Query("language") String language, @Query("country") String country);
 
 
-        @Headers({"cacheable: 60",
+        @Headers({"cacheable: 600",
                 "Content-Type: application/json"})
         @POST
         Observable<IconsBean> getFeatureImage(@Url String url, @Body RequestBody body);
 
-        @Headers("cacheable: 60")
+        @Headers("cacheable: 600")
         @GET
         Observable<List<TopicsSearchBean>> getTopicsSuggestions(@Url String url, @Query("q") String query);
     }

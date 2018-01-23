@@ -12,7 +12,8 @@
         android:id="@+id/iv_icon"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="centerInside"/>
+        android:scaleType="centerInside"
+        android:foreground="@drawable/source_foreground"/>
 
     <LinearLayout
         android:layout_width="0dp"
@@ -34,7 +35,7 @@
         android:id="@+id/tv_source_name"
         android:layout_width="match_parent"
         android:layout_height="40dp"
-        android:maxLines="2"
+        android:maxLines="3"
         android:layout_margin="10dp"
         android:gravity="center"
         tools:text="ABC News (AU)"
@@ -43,6 +44,7 @@
         app:autoSizeMaxTextSize="30sp"
         app:autoSizeMinTextSize="12sp"
         app:autoSizeStepGranularity="1dp"
+        android:textColor="#FFF"
         android:textStyle="bold"/>
 
     <CheckBox

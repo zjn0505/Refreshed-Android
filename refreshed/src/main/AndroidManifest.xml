@@ -27,10 +27,22 @@
         </activity>
 
         <activity android:name="xyz.jienan.refreshed.source_select.SourcesSelectActivity"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait"
+            android:parentActivityName=".MainActivity"/>
 
         <activity android:name="xyz.jienan.refreshed.island.NewsIslandActivity"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait"
+            android:parentActivityName=".MainActivity"/>
+
+        <meta-data
+            android:name="ADMOB_APP_ID"
+            android:value="${ADMOB_APP_ID}" />
+        <meta-data
+            android:name="ADMOD_LIST_INSERT_ADS_UNIT_ID"
+            android:value="${ADMOD_LIST_INSERT_ADS_UNIT_ID}" />
+        <meta-data
+            android:name="NEWSAPI_API_KEY"
+            android:value="${NEWSAPI_API_KEY}" />
 
     </application>
 

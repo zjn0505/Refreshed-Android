@@ -34,9 +34,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.google.android.gms.ads.MobileAds;
+
 import xyz.jienan.refreshed.headlines.HeadlinesFragment;
 import xyz.jienan.refreshed.topics.TopicsFragment;
 import xyz.jienan.refreshed.ui.GlideFaceDetector;
+
+import static xyz.jienan.refreshed.MetaUtils.ADMOB_APP_ID;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -53,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
         final ActionBar ab = getSupportActionBar();
         ab.setHomeAsUpIndicator(R.drawable.ic_menu);
         ab.setDisplayHomeAsUpEnabled(true);
+        MobileAds.initialize(this, MetaUtils.getMeta(ADMOB_APP_ID));
         GlideFaceDetector.initialize(this);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
@@ -60,15 +65,6 @@ public class MainActivity extends AppCompatActivity {
         if (navigationView != null) {
             setupDrawerContent(navigationView);
         }
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Here's a Snackbar", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setVisibility(View.GONE);
@@ -85,20 +81,20 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        switch (AppCompatDelegate.getDefaultNightMode()) {
-            case AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM:
-                menu.findItem(R.id.menu_night_mode_system).setChecked(true);
-                break;
-            case AppCompatDelegate.MODE_NIGHT_AUTO:
-                menu.findItem(R.id.menu_night_mode_auto).setChecked(true);
-                break;
-            case AppCompatDelegate.MODE_NIGHT_YES:
-                menu.findItem(R.id.menu_night_mode_night).setChecked(true);
-                break;
-            case AppCompatDelegate.MODE_NIGHT_NO:
-                menu.findItem(R.id.menu_night_mode_day).setChecked(true);
-                break;
-        }
+//        switch (AppCompatDelegate.getDefaultNightMode()) {
+//            case AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM:
+//                menu.findItem(R.id.menu_night_mode_system).setChecked(true);
+//                break;
+//            case AppCompatDelegate.MODE_NIGHT_AUTO:
+//                menu.findItem(R.id.menu_night_mode_auto).setChecked(true);
+//                break;
+//            case AppCompatDelegate.MODE_NIGHT_YES:
+//                menu.findItem(R.id.menu_night_mode_night).setChecked(true);
+//                break;
+//            case AppCompatDelegate.MODE_NIGHT_NO:
+//                menu.findItem(R.id.menu_night_mode_day).setChecked(true);
+//                break;
+//        }
         return true;
     }
 
@@ -108,18 +104,18 @@ public class MainActivity extends AppCompatActivity {
             case android.R.id.home:
                 mDrawerLayout.openDrawer(GravityCompat.START);
                 return true;
-            case R.id.menu_night_mode_system:
-                setNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
-                break;
-            case R.id.menu_night_mode_day:
-                setNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-                break;
-            case R.id.menu_night_mode_night:
-                setNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-                break;
-            case R.id.menu_night_mode_auto:
-                setNightMode(AppCompatDelegate.MODE_NIGHT_AUTO);
-                break;
+//            case R.id.menu_night_mode_system:
+//                setNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+//                break;
+//            case R.id.menu_night_mode_day:
+//                setNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+//                break;
+//            case R.id.menu_night_mode_night:
+//                setNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+//                break;
+//            case R.id.menu_night_mode_auto:
+//                setNightMode(AppCompatDelegate.MODE_NIGHT_AUTO);
+//                break;
         }
         return super.onOptionsItemSelected(item);
     }
