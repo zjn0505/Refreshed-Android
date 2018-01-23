@@ -29,8 +29,50 @@
         android:layout_height="match_parent"
         android:layout_width="wrap_content"
         android:layout_gravity="start"
-        android:fitsSystemWindows="true"
-        app:headerLayout="@layout/nav_header"
-        app:menu="@menu/drawer_view"/>
+        android:fitsSystemWindows="true">
+
+        <android.support.v4.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <include layout="@layout/nav_header"/>
+
+                <TextView
+                    android:id="@+id/tv_headlines"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Headlines"
+                    android:drawableLeft="@drawable/ic_headlines"/>
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/rv_headlines"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="true"/>
+
+                <TextView
+                    android:id="@+id/tv_topics"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Topics"
+                    android:drawableLeft="@drawable/ic_topics"/>
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/rv_topics"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="true"/>
+
+            </LinearLayout>
+
+        </android.support.v4.widget.NestedScrollView>
+
+
+
+    </android.support.design.widget.NavigationView>
 
 </android.support.v4.widget.DrawerLayout>

@@ -198,6 +198,7 @@ public class NetworkService {
         Observable<NewsSourcesBean> getSources(@Query("language") String language, @Query("country") String country);
 
 
+        // TODO OKHttp doesn't support POST request cache.
         @Headers({"cacheable: 600",
                 "Content-Type: application/json"})
         @POST

@@ -18,6 +18,7 @@ import com.gturedi.views.StatefulLayout;
 import java.util.List;
 
 import xyz.jienan.refreshed.R;
+import xyz.jienan.refreshed.base.RefreshedApplication;
 import xyz.jienan.refreshed.network.entity.NewsSourceBean;
 import xyz.jienan.refreshed.news_list.INewsListFragmentListener;
 import xyz.jienan.refreshed.source_select.SourcesSelectActivity;
@@ -84,7 +85,7 @@ public class HeadlinesFragment extends Fragment implements HeadlinesContract.Vie
     private void addSourcesToAdapter(List<NewsSourceBean> sourceList) {
         adapter.updateSource(sourceList);
         viewPager.setCurrentItem(0);
-
+        ((RefreshedApplication) getActivity().getApplication()).bus().send(sourceList);
     }
 
     @Override

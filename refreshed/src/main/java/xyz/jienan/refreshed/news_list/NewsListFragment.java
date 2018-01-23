@@ -119,6 +119,7 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
         recyclerView.setLayoutManager(new LinearLayoutManager(recyclerView.getContext()));
         mAdapter = new NewsAdapter(getActivity(), null);
         recyclerView.setAdapter(mAdapter);
+        recyclerView.setHasFixedSize(false);
     }
 
     @Override

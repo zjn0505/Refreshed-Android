@@ -19,6 +19,7 @@ public class RefreshedApplication extends Application {
     public static RefreshedApplication getInstance() {
         return mInstance;
     }
+    private RxBus bus;
 
     @Override
     public void onCreate() {
@@ -30,6 +31,7 @@ public class RefreshedApplication extends Application {
                 .name("news.realm")
                 .schemaVersion(0)
                 .build();
+        bus = new RxBus();
     }
 
     private boolean isGooglePlayServicesAvailable() {
@@ -39,5 +41,9 @@ public class RefreshedApplication extends Application {
             return false;
         }
         return true;
+    }
+
+    public RxBus bus() {
+        return bus;
     }
 }
