@@ -10,6 +10,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.CursorAdapter;
 import android.support.v4.widget.SimpleCursorAdapter;
@@ -27,7 +28,9 @@ import com.gturedi.views.StatefulLayout;
 import java.util.ArrayList;
 import java.util.List;
 
+import xyz.jienan.refreshed.MainActivity;
 import xyz.jienan.refreshed.R;
+import xyz.jienan.refreshed.base.RefreshedApplication;
 import xyz.jienan.refreshed.island.NewsIslandActivity;
 import xyz.jienan.refreshed.network.entity.NewsTopicsRequest;
 import xyz.jienan.refreshed.network.entity.TopicsSearchBean;
@@ -35,11 +38,13 @@ import xyz.jienan.refreshed.news_list.INewsListFragmentListener;
 import xyz.jienan.refreshed.source_select.SourcesSelectActivity;
 import xyz.jienan.refreshed.ui.NewsPagerAdapter;
 
+import static android.app.Activity.RESULT_OK;
+
 /**
  * Created by jienanzhang on 21/01/2018.
  */
 
-public class TopicsFragment extends Fragment implements TopicsContract.View {
+public class TopicsFragment extends Fragment implements TopicsContract.View, MainActivity.IViewPagerHolder {
 
     private StatefulLayout stateful;
     private NewsPagerAdapter adapter;
@@ -49,7 +54,7 @@ public class TopicsFragment extends Fragment implements TopicsContract.View {
     private CursorAdapter searchAdapter;
     private List<TopicsSearchBean> searchSuggestions = new ArrayList<>();
     private final static int REQ_ISLAND_ACTIVITY = 101;
-
+    private int landingPage = 0;
 
     @Nullable
     @Override
@@ -58,6 +63,7 @@ public class TopicsFragment extends Fragment implements TopicsContract.View {
         stateful = (StatefulLayout) inflater.inflate(R.layout.fragment_refreshed, container, false);
         viewPager = stateful.findViewById(R.id.viewpager);
         tabLayout = getActivity().findViewById(R.id.tabs);
+        adapter = new NewsPagerAdapter(getChildFragmentManager());
         if (viewPager != null) {
             setupViewPager(viewPager);
         }
@@ -67,9 +73,16 @@ public class TopicsFragment extends Fragment implements TopicsContract.View {
         return stateful;
     }
 
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        if (!hidden) {
+            setupViewPager(viewPager);
+        }
+    }
+
     private void setupViewPager(ViewPager viewPager) {
         tabLayout.setupWithViewPager(viewPager);
-        adapter = new NewsPagerAdapter(getChildFragmentManager());
         viewPager.setAdapter(adapter);
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -96,9 +109,9 @@ public class TopicsFragment extends Fragment implements TopicsContract.View {
     @Override
     public void onCreateOptionsMenu(Menu menu, final MenuInflater inflater) {
         inflater.inflate(R.menu.menu_topics, menu);
-        SearchManager searchManager = (SearchManager) getActivity().getSystemService(Context.SEARCH_SERVICE);
-
-        final SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+        final SearchManager searchManager = (SearchManager) getActivity().getSystemService(Context.SEARCH_SERVICE);
+        final MenuItem search = menu.findItem(R.id.action_search);
+        final SearchView searchView = (SearchView) search.getActionView();
         searchView.setQueryHint(getString(R.string.search_hint));
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getActivity().getComponentName()));
         if (searchAdapter == null) {
@@ -123,9 +136,6 @@ public class TopicsFragment extends Fragment implements TopicsContract.View {
                 String topic = searchSuggestions.get(position).getTitle();
                 searchView.setQuery(topic, true);
                 searchView.clearFocus();
-                Intent intent = new Intent(getActivity(), NewsIslandActivity.class);
-                intent.putExtra("source", topic);
-                startActivityForResult(intent, REQ_ISLAND_ACTIVITY);
                 return true;
             }
         });
@@ -135,6 +145,7 @@ public class TopicsFragment extends Fragment implements TopicsContract.View {
                 Intent intent = new Intent(getActivity(), NewsIslandActivity.class);
                 intent.putExtra("source", query);
                 startActivityForResult(intent, REQ_ISLAND_ACTIVITY);
+                search.collapseActionView();
                 return true;
             }
 
@@ -157,9 +168,25 @@ public class TopicsFragment extends Fragment implements TopicsContract.View {
         return true;
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQ_ISLAND_ACTIVITY) {
+            if (resultCode == RESULT_OK) {
+                mPresenter.loadTopics(true);
+            }
+        }
+    }
+
     private void addTopicsToAdapter(List<NewsTopicsRequest> sourceList) {
         adapter.updateSource(sourceList);
-        viewPager.setCurrentItem(0);
+        if (landingPage != 0 && landingPage < sourceList.size()) {
+            viewPager.setCurrentItem(landingPage);
+            landingPage = 0;
+        } else {
+            viewPager.setCurrentItem(0);
+        }
+        ((RefreshedApplication) getActivity().getApplication()).bus().send(sourceList);
     }
 
     @Override
@@ -194,5 +221,10 @@ public class TopicsFragment extends Fragment implements TopicsContract.View {
             cursor.addRow(tmp);
         }
         searchAdapter.swapCursor(cursor);
+    }
+
+    @Override
+    public void switchToSource(String sourceName) {
+        landingPage = adapter.getItemPosition(sourceName);
     }
 }

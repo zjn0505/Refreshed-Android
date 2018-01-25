@@ -23,10 +23,18 @@ public interface IDBManager {
 
 
     /**
-     * @param withCandidates true - with topic
+     * Get the list of saved topics
+     * @param withCandidates true if return the list with candidates topics
      * @return
      */
     List<NewsTopicsRequest> getTopics(boolean withCandidates);
 
+    /**
+     * Query the db to get related topics info
+     * @param newsSource
+     * @return
+     */
     NewsTopicsRequest getTopicsRequest(String newsSource);
+
+    boolean addTopics(String topics);
 }

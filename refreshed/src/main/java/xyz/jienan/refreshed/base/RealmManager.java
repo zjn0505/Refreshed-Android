@@ -144,4 +144,25 @@ public class RealmManager implements IDBManager {
     public NewsTopicsRequest getTopicsRequest(String newsSource) {
         return realm.where(NewsTopicsRequest.class).equalTo("q", newsSource).findFirst();
     }
+
+    @Override
+    public boolean addTopics(String topics) {
+        RealmResults results = realm.where(NewsTopicsRequest.class).greaterThan("index", -1).findAll();
+
+        NewsTopicsRequest topicsRequest = new NewsTopicsRequest();
+        topicsRequest.setQ(topics);
+        topicsRequest.setIndex(results.size());
+        realm.beginTransaction();
+        realm.insertOrUpdate(topicsRequest);
+        try {
+            realm.commitTransaction();
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (realm.isInTransaction()) {
+                realm.cancelTransaction();
+            }
+            return false;
+        }
+        return true;
+    }
 }

@@ -28,13 +28,7 @@ public class NewsPagerAdapter extends FragmentStatePagerAdapter {
     public int getItemPosition(Object object) {
         INewsListFragmentListener fragment = (INewsListFragmentListener) object;
         String title = fragment.getFragmentName();
-
-        for (ITabEntity source : sourceList) {
-            if (source.getName().equals(title)) {
-                return sourceList.indexOf(source);
-            }
-        }
-        return POSITION_NONE;
+        return getItemPosition(title);
     }
 
     @Override
@@ -58,5 +52,14 @@ public class NewsPagerAdapter extends FragmentStatePagerAdapter {
     public void updateSource(List<? extends ITabEntity> sourceList) {
         this.sourceList = sourceList;
         notifyDataSetChanged();
+    }
+
+    public int getItemPosition(String sourceName) {
+        for (ITabEntity source : sourceList) {
+            if (source.getName().equals(sourceName)) {
+                return sourceList.indexOf(source);
+            }
+        }
+        return POSITION_NONE;
     }
 }

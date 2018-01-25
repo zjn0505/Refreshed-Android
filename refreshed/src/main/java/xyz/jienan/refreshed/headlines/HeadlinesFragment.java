@@ -17,6 +17,7 @@ import com.gturedi.views.StatefulLayout;
 
 import java.util.List;
 
+import xyz.jienan.refreshed.MainActivity;
 import xyz.jienan.refreshed.R;
 import xyz.jienan.refreshed.base.RefreshedApplication;
 import xyz.jienan.refreshed.network.entity.NewsSourceBean;
@@ -30,13 +31,14 @@ import static android.app.Activity.RESULT_OK;
  * Created by jienanzhang on 17/07/2017.
  */
 
-public class HeadlinesFragment extends Fragment implements HeadlinesContract.View {
+public class HeadlinesFragment extends Fragment implements HeadlinesContract.View, MainActivity.IViewPagerHolder {
 
     private NewsPagerAdapter adapter;
     private TabLayout tabLayout;
     private ViewPager viewPager;
     private HeadlinesContract.Presenter mPresenter;
     private StatefulLayout stateful;
+    private int landingPage = 0;
 
     @Nullable
     @Override
@@ -46,6 +48,7 @@ public class HeadlinesFragment extends Fragment implements HeadlinesContract.Vie
         stateful = (StatefulLayout) inflater.inflate(R.layout.fragment_refreshed, container, false);
         viewPager = stateful.findViewById(R.id.viewpager);
         tabLayout = getActivity().findViewById(R.id.tabs);
+        adapter = new NewsPagerAdapter(getChildFragmentManager());
         if (viewPager != null) {
             setupViewPager(viewPager);
         }
@@ -55,10 +58,16 @@ public class HeadlinesFragment extends Fragment implements HeadlinesContract.Vie
         return stateful;
     }
 
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        if (!hidden) {
+            setupViewPager(viewPager);
+        }
+    }
 
     private void setupViewPager(ViewPager viewPager) {
         tabLayout.setupWithViewPager(viewPager);
-        adapter = new NewsPagerAdapter(getChildFragmentManager());
         viewPager.setAdapter(adapter);
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -84,7 +93,12 @@ public class HeadlinesFragment extends Fragment implements HeadlinesContract.Vie
 
     private void addSourcesToAdapter(List<NewsSourceBean> sourceList) {
         adapter.updateSource(sourceList);
-        viewPager.setCurrentItem(0);
+        if (landingPage != 0 && landingPage < sourceList.size()) {
+            viewPager.setCurrentItem(landingPage);
+            landingPage = 0;
+        } else {
+            viewPager.setCurrentItem(0);
+        }
         ((RefreshedApplication) getActivity().getApplication()).bus().send(sourceList);
     }
 
@@ -130,5 +144,10 @@ public class HeadlinesFragment extends Fragment implements HeadlinesContract.Vie
         if (requestCode == 1 && resultCode == RESULT_OK) {
             mPresenter.loadSources();
         }
+    }
+
+    @Override
+    public void switchToSource(String sourceName) {
+        landingPage = adapter.getItemPosition(sourceName);
     }
 }

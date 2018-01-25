@@ -40,4 +40,17 @@
     <style name="myAutoCompleteTextViewStyle" parent="Base.V7.Widget.AppCompat.AutoCompleteTextView">
         <item name="android:popupBackground">#FFF</item>
     </style>
+
+    <style name="drawer_main_item">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">#404040</item>
+        <item name="android:drawablePadding">25dp</item>
+        <item name="android:layout_marginTop">10dp</item>
+        <item name="android:layout_marginBottom">6dp</item>
+        <item name="android:layout_marginLeft">10dp</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
 </resources>

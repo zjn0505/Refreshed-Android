@@ -24,6 +24,7 @@ import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -50,8 +51,10 @@ import xyz.jienan.refreshed.base.RefreshedApplication;
 import xyz.jienan.refreshed.headlines.HeadlinesFragment;
 import xyz.jienan.refreshed.network.entity.ITabEntity;
 import xyz.jienan.refreshed.network.entity.NewsSourceBean;
+import xyz.jienan.refreshed.network.entity.NewsTopicsRequest;
 import xyz.jienan.refreshed.topics.TopicsFragment;
 import xyz.jienan.refreshed.ui.DrawerAdapter;
+import xyz.jienan.refreshed.ui.DrawerAdapter.IDrawerItemClickListener;
 import xyz.jienan.refreshed.ui.GlideFaceDetector;
 
 import static xyz.jienan.refreshed.MetaUtils.ADMOB_APP_ID;
@@ -64,6 +67,9 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView rvTopics;
     private DrawerAdapter headlinesAdapter;
     private DrawerAdapter topicsAdapter;
+    private FragmentManager fragmentManager;
+    private DrawerMainItemClickListener drawerItemClickListener;
+    private DrawerSubItemClickListener drawerSubItemClickListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,8 +88,9 @@ public class MainActivity extends AppCompatActivity {
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         rvHeadlines = findViewById(R.id.rv_headlines);
         rvTopics = findViewById(R.id.rv_topics);
-        headlinesAdapter = new DrawerAdapter();
-        topicsAdapter = new DrawerAdapter();
+        drawerSubItemClickListener = new DrawerSubItemClickListener();
+        headlinesAdapter = new DrawerAdapter(drawerSubItemClickListener, DrawerAdapter.TYPE_HEADLINES);
+        topicsAdapter = new DrawerAdapter(drawerSubItemClickListener, DrawerAdapter.TYPE_TOPICS);
         rvHeadlines.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         rvTopics.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         rvHeadlines.setHasFixedSize(true);
@@ -91,24 +98,39 @@ public class MainActivity extends AppCompatActivity {
         rvHeadlines.setAdapter(headlinesAdapter);
         rvTopics.setAdapter(topicsAdapter);
 
+        fragmentManager = getSupportFragmentManager();
+        drawerItemClickListener = new DrawerMainItemClickListener();
+
         if (navigationView != null) {
             setupDrawerContent(navigationView);
         }
 
+        if (headlinesFragment == null) {
+            headlinesFragment = new HeadlinesFragment();
+        }
+        if (topicsFragment == null) {
+            topicsFragment = new TopicsFragment();
+        }
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.add(R.id.container, topicsFragment,"topics");
+        transaction.add(R.id.container, headlinesFragment,"headlines");
+        transaction.hide(topicsFragment);
+
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setVisibility(View.GONE);
 
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.container, new HeadlinesFragment()).commit();
-
+        transaction.commit();
+        setTitle("Headlines");
         ((RefreshedApplication) getApplication()).bus().toObservable()
                 .subscribe(new Consumer<Object>() {
 
                     @Override
                     public void accept(Object o) throws Exception {
                         if (o instanceof List) {
-                            if(((List)o).size()>0 && (((List)o).get(0) instanceof NewsSourceBean)){
-                                updateDrawer(R.id.nav_headlines, (List<ITabEntity>) o);
+                            if(((List)o).size()>0){
+                                if (((List)o).get(0) instanceof ITabEntity) {
+                                    updateDrawer((List<ITabEntity>) o);
+                                }
                             }
                         }
                     }
@@ -123,20 +145,6 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-//        switch (AppCompatDelegate.getDefaultNightMode()) {
-//            case AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM:
-//                menu.findItem(R.id.menu_night_mode_system).setChecked(true);
-//                break;
-//            case AppCompatDelegate.MODE_NIGHT_AUTO:
-//                menu.findItem(R.id.menu_night_mode_auto).setChecked(true);
-//                break;
-//            case AppCompatDelegate.MODE_NIGHT_YES:
-//                menu.findItem(R.id.menu_night_mode_night).setChecked(true);
-//                break;
-//            case AppCompatDelegate.MODE_NIGHT_NO:
-//                menu.findItem(R.id.menu_night_mode_day).setChecked(true);
-//                break;
-//        }
         return true;
     }
 
@@ -157,72 +165,72 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupDrawerContent(NavigationView navigationView) {
-//        navigationView.setNavigationItemSelectedListener(
-//                new NavigationView.OnNavigationItemSelectedListener() {
-//            @Override
-//            public boolean onNavigationItemSelected(MenuItem menuItem) {
-//
-//                selectDrawerItem(menuItem);
-//
-//                return true;
-//            }
-//        });
-
         TextView tvHeadline = findViewById(R.id.tv_headlines);
-        tvHeadline.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FragmentManager fragmentManager = getSupportFragmentManager();
-                fragmentManager.beginTransaction().replace(R.id.container, new HeadlinesFragment()).commit();
-                mDrawerLayout.closeDrawers();
-                setTitle("Headlines");
-            }
-        });
+        tvHeadline.setOnClickListener(drawerItemClickListener);
 
         TextView tvTopics = findViewById(R.id.tv_topics);
-        tvTopics.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FragmentManager fragmentManager = getSupportFragmentManager();
-                fragmentManager.beginTransaction().replace(R.id.container, new TopicsFragment()).commit();
-                mDrawerLayout.closeDrawers();
-                setTitle("Topics");
+        tvTopics.setOnClickListener(drawerItemClickListener);
+    }
+
+
+    private HeadlinesFragment headlinesFragment;
+    private TopicsFragment topicsFragment;
+
+    private class DrawerMainItemClickListener implements View.OnClickListener {
+
+        @Override
+        public void onClick(View v) {
+            if (v.getId() == R.id.tv_headlines || v.getId() == R.id.tv_topics) {
+                switchFragment(v.getId());
             }
-        });
+        }
     }
 
-    private void selectDrawerItem(MenuItem menuItem) {
-        Fragment fragment = null;
-        Class fragmentClass = null;
-        switch (menuItem.getItemId()) {
-            case R.id.nav_headlines:
-                fragmentClass = HeadlinesFragment.class;
-                break;
-            case R.id.nav_topics:
-                fragmentClass = TopicsFragment.class;
-        }
-        try {
-            fragment = (Fragment) fragmentClass.newInstance();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        if (fragment == null) {
-            return;
-        }
+    private class DrawerSubItemClickListener implements IDrawerItemClickListener {
 
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.container, fragment).commit();
-        menuItem.setChecked(true);
+        @Override
+        public void onDrawerItemClicked(int type, String sourceName) {
+            if (type == DrawerAdapter.TYPE_HEADLINES) {
+                switchFragment(R.id.tv_headlines);
+                headlinesFragment.switchToSource(sourceName);
+            } else if (type == DrawerAdapter.TYPE_TOPICS) {
+                switchFragment(R.id.tv_topics);
+                topicsFragment.switchToSource(sourceName);
+            }
+        }
+    }
+
+    private void switchFragment(int id) {
+        Fragment toShow = null;
+        Fragment toHide = null;
+        String title = "";
+        if (id == R.id.tv_headlines) {
+            toShow = fragmentManager.findFragmentByTag("headlines");
+            toHide = fragmentManager.findFragmentByTag("topics");
+            title = "Headlines";
+        } else if (id == R.id.tv_topics) {
+            toShow = fragmentManager.findFragmentByTag("topics");
+            toHide = fragmentManager.findFragmentByTag("headlines");
+            title = "Topics";
+        }
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.hide(toHide).show(toShow).commit();
         mDrawerLayout.closeDrawers();
-        setTitle(menuItem.getTitle());
+        setTitle(title);
     }
 
-    void updateDrawer(int menuGroupId, List<ITabEntity> items) {
-        if (menuGroupId == R.id.nav_headlines) {
-            headlinesAdapter.updateList(items);
+    void updateDrawer(List<ITabEntity> items) {
+        if (items.size() > 10) {
+            items = items.subList(0, 10);
         }
-
-
+        if (items.get(0) instanceof NewsSourceBean) {
+            headlinesAdapter.updateList(items);
+        } else if (items.get(0) instanceof NewsTopicsRequest) {
+            topicsAdapter.updateList(items);
+        }
     }
 
+    public interface IViewPagerHolder {
+        void switchToSource(String sourceName);
+    }
 }

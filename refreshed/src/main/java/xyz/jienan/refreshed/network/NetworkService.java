@@ -166,29 +166,29 @@ public class NetworkService {
     public interface NewsAPI {
 
         // Headline section
-        @Headers("cacheable: 86400")
+        @Headers("cacheable: 3600")
         @GET("top-headlines")
         Observable<ArticlesBean> getHeadLinesBySource(@Query("sources") String sources);
 
-        @Headers({"cacheable: 86400", "bypass: 1"})
+        @Headers({"cacheable: 3600", "bypass: 1"})
         @GET("top-headlines")
         Observable<ArticlesBean> getHeadLinesBySourceWithoutCache(@Query("sources") String sources);
 
         // Topic section
-        @Headers("cacheable: 86400")
+        @Headers("cacheable: 3600")
         @GET("top-headlines?country=us")
         Observable<ArticlesBean> getTopics(@Query("q") String query, @Query("category") String category);
 
         // Topic section
-        @Headers({"cacheable: 86400", "bypass: 1"})
+        @Headers({"cacheable: 3600", "bypass: 1"})
         @GET("top-headlines?country=us")
         Observable<ArticlesBean> getTopicsWithoutCache(@Query("q") String query, @Query("category") String category);
 
-        @Headers("cacheable: 86400")
+        @Headers("cacheable: 3600")
         @GET("everything?sortBy=relevancy")
         Observable<ArticlesBean> getCustomQuery(@Query("q") String query, @Query("language") String language, @Query("from") String from);
 
-        @Headers({"cacheable: 86400", "bypass: 1"})
+        @Headers({"cacheable: 3600", "bypass: 1"})
         @GET("everything?sortBy=relevancy")
         Observable<ArticlesBean> getCustomQueryWithoutCache(@Query("q") String query, @Query("language") String language, @Query("from") String from);
 
