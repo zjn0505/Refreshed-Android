@@ -89,6 +89,12 @@ public class HeadlinesFragment extends Fragment implements HeadlinesContract.Vie
                 }
             }
         });
+        if (landingPage != 0 && landingPage < adapter.getCount()) {
+            viewPager.setCurrentItem(landingPage);
+            landingPage = 0;
+        } else {
+            viewPager.setCurrentItem(0);
+        }
     }
 
     private void addSourcesToAdapter(List<NewsSourceBean> sourceList) {
@@ -149,5 +155,6 @@ public class HeadlinesFragment extends Fragment implements HeadlinesContract.Vie
     @Override
     public void switchToSource(String sourceName) {
         landingPage = adapter.getItemPosition(sourceName);
+        viewPager.setCurrentItem(landingPage);
     }
 }

@@ -104,6 +104,12 @@ public class TopicsFragment extends Fragment implements TopicsContract.View, Mai
                 }
             }
         });
+        if (landingPage != 0 && landingPage < adapter.getCount()) {
+            viewPager.setCurrentItem(landingPage);
+            landingPage = 0;
+        } else {
+            viewPager.setCurrentItem(0);
+        }
     }
 
     @Override
@@ -226,5 +232,6 @@ public class TopicsFragment extends Fragment implements TopicsContract.View, Mai
     @Override
     public void switchToSource(String sourceName) {
         landingPage = adapter.getItemPosition(sourceName);
+        viewPager.setCurrentItem(landingPage);
     }
 }
