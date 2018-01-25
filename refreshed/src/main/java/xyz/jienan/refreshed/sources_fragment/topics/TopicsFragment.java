@@ -1,4 +1,4 @@
-package xyz.jienan.refreshed.topics;
+package xyz.jienan.refreshed.sources_fragment.topics;
 
 import android.app.SearchManager;
 import android.content.Context;
@@ -8,10 +8,6 @@ import android.os.Bundle;
 import android.provider.BaseColumns;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
-import android.support.v4.view.MenuItemCompat;
-import android.support.v4.view.ViewPager;
 import android.support.v4.widget.CursorAdapter;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.widget.SearchView;
@@ -21,21 +17,18 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 
 import com.gturedi.views.StatefulLayout;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import xyz.jienan.refreshed.MainActivity;
 import xyz.jienan.refreshed.R;
 import xyz.jienan.refreshed.base.RefreshedApplication;
 import xyz.jienan.refreshed.island.NewsIslandActivity;
 import xyz.jienan.refreshed.network.entity.NewsTopicsRequest;
 import xyz.jienan.refreshed.network.entity.TopicsSearchBean;
-import xyz.jienan.refreshed.news_list.INewsListFragmentListener;
-import xyz.jienan.refreshed.source_select.SourcesSelectActivity;
+import xyz.jienan.refreshed.sources_fragment.BaseSourcesFragment;
 import xyz.jienan.refreshed.ui.NewsPagerAdapter;
 
 import static android.app.Activity.RESULT_OK;
@@ -44,17 +37,12 @@ import static android.app.Activity.RESULT_OK;
  * Created by jienanzhang on 21/01/2018.
  */
 
-public class TopicsFragment extends Fragment implements TopicsContract.View, MainActivity.IViewPagerHolder {
+public class TopicsFragment extends BaseSourcesFragment implements TopicsContract.View {
 
-    private StatefulLayout stateful;
-    private NewsPagerAdapter adapter;
-    private TabLayout tabLayout;
-    private ViewPager viewPager;
     private TopicsContract.Presenter mPresenter;
     private CursorAdapter searchAdapter;
     private List<TopicsSearchBean> searchSuggestions = new ArrayList<>();
     private final static int REQ_ISLAND_ACTIVITY = 101;
-    private int landingPage = 0;
 
     @Nullable
     @Override
@@ -71,45 +59,6 @@ public class TopicsFragment extends Fragment implements TopicsContract.View, Mai
         mPresenter.loadTopics(false);
 //        stateful.showLoading(); // TODO don't know why
         return stateful;
-    }
-
-    @Override
-    public void onHiddenChanged(boolean hidden) {
-        super.onHiddenChanged(hidden);
-        if (!hidden) {
-            setupViewPager(viewPager);
-        }
-    }
-
-    private void setupViewPager(ViewPager viewPager) {
-        tabLayout.setupWithViewPager(viewPager);
-        viewPager.setAdapter(adapter);
-        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-
-            }
-
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
-
-            }
-
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {
-                if (adapter != null) {
-                    int position = tab.getPosition();
-                    INewsListFragmentListener fragment = (INewsListFragmentListener) adapter.getItem(position);
-                    fragment.scrollTo(0);
-                }
-            }
-        });
-        if (landingPage != 0 && landingPage < adapter.getCount()) {
-            viewPager.setCurrentItem(landingPage);
-            landingPage = 0;
-        } else {
-            viewPager.setCurrentItem(0);
-        }
     }
 
     @Override
@@ -229,9 +178,5 @@ public class TopicsFragment extends Fragment implements TopicsContract.View, Mai
         searchAdapter.swapCursor(cursor);
     }
 
-    @Override
-    public void switchToSource(String sourceName) {
-        landingPage = adapter.getItemPosition(sourceName);
-        viewPager.setCurrentItem(landingPage);
-    }
+
 }

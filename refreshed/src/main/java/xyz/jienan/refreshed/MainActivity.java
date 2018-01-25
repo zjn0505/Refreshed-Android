@@ -16,11 +16,8 @@
 
 package xyz.jienan.refreshed;
 
-import android.os.Build;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -29,17 +26,12 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.SubMenu;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.google.android.gms.ads.MobileAds;
@@ -48,11 +40,11 @@ import java.util.List;
 
 import io.reactivex.functions.Consumer;
 import xyz.jienan.refreshed.base.RefreshedApplication;
-import xyz.jienan.refreshed.headlines.HeadlinesFragment;
 import xyz.jienan.refreshed.network.entity.ITabEntity;
 import xyz.jienan.refreshed.network.entity.NewsSourceBean;
 import xyz.jienan.refreshed.network.entity.NewsTopicsRequest;
-import xyz.jienan.refreshed.topics.TopicsFragment;
+import xyz.jienan.refreshed.sources_fragment.headlines.HeadlinesFragment;
+import xyz.jienan.refreshed.sources_fragment.topics.TopicsFragment;
 import xyz.jienan.refreshed.ui.DrawerAdapter;
 import xyz.jienan.refreshed.ui.DrawerAdapter.IDrawerItemClickListener;
 import xyz.jienan.refreshed.ui.GlideFaceDetector;
@@ -228,9 +220,5 @@ public class MainActivity extends AppCompatActivity {
         } else if (items.get(0) instanceof NewsTopicsRequest) {
             topicsAdapter.updateList(items);
         }
-    }
-
-    public interface IViewPagerHolder {
-        void switchToSource(String sourceName);
     }
 }

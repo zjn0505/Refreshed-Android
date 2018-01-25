@@ -1,4 +1,4 @@
-package xyz.jienan.refreshed.headlines;
+package xyz.jienan.refreshed.sources_fragment.headlines;
 
 import java.util.List;
 
@@ -9,7 +9,7 @@ import xyz.jienan.refreshed.network.entity.NewsSourceBean;
  */
 
 public class HeadlinesContract {
-    interface View {
+    public interface View {
         void renderSources(List<NewsSourceBean> sources);
     }
     interface Presenter {

@@ -1,4 +1,4 @@
-package xyz.jienan.refreshed.headlines;
+package xyz.jienan.refreshed.sources_fragment.headlines;
 
 import java.util.List;
 

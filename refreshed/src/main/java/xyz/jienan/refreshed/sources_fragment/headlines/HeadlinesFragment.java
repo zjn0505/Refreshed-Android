@@ -1,11 +1,8 @@
-package xyz.jienan.refreshed.headlines;
+package xyz.jienan.refreshed.sources_fragment.headlines;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
-import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -17,12 +14,11 @@ import com.gturedi.views.StatefulLayout;
 
 import java.util.List;
 
-import xyz.jienan.refreshed.MainActivity;
 import xyz.jienan.refreshed.R;
 import xyz.jienan.refreshed.base.RefreshedApplication;
 import xyz.jienan.refreshed.network.entity.NewsSourceBean;
-import xyz.jienan.refreshed.news_list.INewsListFragmentListener;
 import xyz.jienan.refreshed.source_select.SourcesSelectActivity;
+import xyz.jienan.refreshed.sources_fragment.BaseSourcesFragment;
 import xyz.jienan.refreshed.ui.NewsPagerAdapter;
 
 import static android.app.Activity.RESULT_OK;
@@ -31,14 +27,8 @@ import static android.app.Activity.RESULT_OK;
  * Created by jienanzhang on 17/07/2017.
  */
 
-public class HeadlinesFragment extends Fragment implements HeadlinesContract.View, MainActivity.IViewPagerHolder {
-
-    private NewsPagerAdapter adapter;
-    private TabLayout tabLayout;
-    private ViewPager viewPager;
+public class HeadlinesFragment extends BaseSourcesFragment implements HeadlinesContract.View {
     private HeadlinesContract.Presenter mPresenter;
-    private StatefulLayout stateful;
-    private int landingPage = 0;
 
     @Nullable
     @Override
@@ -56,45 +46,6 @@ public class HeadlinesFragment extends Fragment implements HeadlinesContract.Vie
         mPresenter.loadSources();
         stateful.showLoading();
         return stateful;
-    }
-
-    @Override
-    public void onHiddenChanged(boolean hidden) {
-        super.onHiddenChanged(hidden);
-        if (!hidden) {
-            setupViewPager(viewPager);
-        }
-    }
-
-    private void setupViewPager(ViewPager viewPager) {
-        tabLayout.setupWithViewPager(viewPager);
-        viewPager.setAdapter(adapter);
-        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-
-            }
-
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
-
-            }
-
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {
-                if (adapter != null) {
-                    int position = tab.getPosition();
-                    INewsListFragmentListener fragment = (INewsListFragmentListener) adapter.getItem(position);
-                    fragment.scrollTo(0);
-                }
-            }
-        });
-        if (landingPage != 0 && landingPage < adapter.getCount()) {
-            viewPager.setCurrentItem(landingPage);
-            landingPage = 0;
-        } else {
-            viewPager.setCurrentItem(0);
-        }
     }
 
     private void addSourcesToAdapter(List<NewsSourceBean> sourceList) {
@@ -150,11 +101,5 @@ public class HeadlinesFragment extends Fragment implements HeadlinesContract.Vie
         if (requestCode == 1 && resultCode == RESULT_OK) {
             mPresenter.loadSources();
         }
-    }
-
-    @Override
-    public void switchToSource(String sourceName) {
-        landingPage = adapter.getItemPosition(sourceName);
-        viewPager.setCurrentItem(landingPage);
     }
 }
