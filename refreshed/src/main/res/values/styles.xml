@@ -1,0 +1,56 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.DayNight.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <style name="Theme.DesignDemo" parent="Base.Theme.DesignDemo">
+    </style>
+
+    <style name="Base.Theme.DesignDemo" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="colorPrimary">#673AB7</item>
+        <item name="colorPrimaryDark">#512DA8</item>
+        <item name="colorAccent">#FF4081</item>
+        <item name="autoCompleteTextViewStyle">@style/myAutoCompleteTextViewStyle</item>
+    </style>
+
+    <style name="Widget.CardContent" parent="android:Widget">
+        <item name="android:paddingLeft">16dp</item>
+        <item name="android:paddingRight">16dp</item>
+        <item name="android:paddingTop">24dp</item>
+        <item name="android:paddingBottom">24dp</item>
+        <item name="android:orientation">vertical</item>
+    </style>
+
+    <style name="edt_name_style">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_margin">20dp</item>
+    </style>
+
+    <style name="tab_text_style" parent="android:TextAppearance.Widget.TabWidget">
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="myAutoCompleteTextViewStyle" parent="Base.V7.Widget.AppCompat.AutoCompleteTextView">
+        <item name="android:popupBackground">#FFF</item>
+    </style>
+
+    <style name="drawer_main_item">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">#404040</item>
+        <item name="android:drawablePadding">25dp</item>
+        <item name="android:layout_marginTop">10dp</item>
+        <item name="android:layout_marginBottom">6dp</item>
+        <item name="android:layout_marginLeft">10dp</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+</resources>
