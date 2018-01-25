@@ -63,7 +63,7 @@ public class BaseSourcesFragment extends Fragment {
         public void onTabReselected(TabLayout.Tab tab) {
             if (adapter != null) {
                 int position = tab.getPosition();
-                INewsListFragmentListener fragment = (INewsListFragmentListener) adapter.getItem(position);
+                INewsListFragmentListener fragment = adapter.getFragment(position);
                 fragment.scrollTo(0);
             }
         }

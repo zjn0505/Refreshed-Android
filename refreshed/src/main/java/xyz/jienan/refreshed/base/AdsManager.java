@@ -1,7 +1,5 @@
 package xyz.jienan.refreshed.base;
 
-import android.os.Build;
-
 import xyz.jienan.refreshed.BuildConfig;
 import xyz.jienan.refreshed.MetaUtils;
 

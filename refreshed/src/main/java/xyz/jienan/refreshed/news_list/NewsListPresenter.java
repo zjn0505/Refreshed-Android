@@ -13,8 +13,8 @@ import io.reactivex.schedulers.Schedulers;
 import xyz.jienan.refreshed.R;
 import xyz.jienan.refreshed.base.IDBManager;
 import xyz.jienan.refreshed.base.RealmManager;
-import xyz.jienan.refreshed.network.entity.ArticlesBean;
 import xyz.jienan.refreshed.network.NetworkService;
+import xyz.jienan.refreshed.network.entity.ArticlesBean;
 import xyz.jienan.refreshed.network.entity.NewsTopicsRequest;
 
 /**
