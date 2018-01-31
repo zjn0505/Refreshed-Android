@@ -32,6 +32,7 @@ public class RefreshedApplication extends Application {
                 .schemaVersion(0)
                 .build();
         bus = new RxBus();
+        AnalyticsManager.getInstance().setContext(this);
     }
 
     private boolean isGooglePlayServicesAvailable() {
