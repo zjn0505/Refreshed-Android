@@ -25,8 +25,8 @@ deploy:
   file_glob: true
   file: refreshed/build/outputs/apk/release/*.apk
   skip_cleanup: true
-    on:
-      tags: true
-      all_branches: true
+  on:
+    tags: true
+    all_branches: true
 after_deploy:
 - dropbox-deployment
