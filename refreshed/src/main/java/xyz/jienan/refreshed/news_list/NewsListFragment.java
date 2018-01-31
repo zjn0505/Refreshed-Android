@@ -38,6 +38,8 @@ import xyz.jienan.refreshed.ui.FaceCenterCrop;
 
 import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
 import static xyz.jienan.refreshed.MetaUtils.ADMOD_LIST_INSERT_ADS_UNIT_ID;
+import static xyz.jienan.refreshed.network.NetworkService.BYPASS_CACHE;
+import static xyz.jienan.refreshed.network.NetworkService.USE_CACHE;
 
 public class NewsListFragment extends Fragment implements NewsListContract.View, SwipeRefreshLayout.OnRefreshListener, INewsListFragmentListener {
 
@@ -124,7 +126,7 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mPresenter.loadList(newsSource, type, false || forceBypassCache);
+        mPresenter.loadList(newsSource, type, forceBypassCache ? BYPASS_CACHE : USE_CACHE);
         stateful.showLoading();
     }
 
@@ -138,7 +140,7 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
     @Override
     public void onRefresh() {
         refreshLayout.setRefreshing(true);
-        mPresenter.loadList(newsSource, type, true);
+        mPresenter.loadList(newsSource, type, BYPASS_CACHE);
     }
 
     @Override
@@ -163,7 +165,7 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
             stateful.showError(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mPresenter.loadList(newsSource, type, true);
+                    mPresenter.loadList(newsSource, type, BYPASS_CACHE);
                     stateful.showLoading();
                 }
             });

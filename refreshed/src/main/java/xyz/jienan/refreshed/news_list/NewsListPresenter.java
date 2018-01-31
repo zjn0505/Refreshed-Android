@@ -17,6 +17,8 @@ import xyz.jienan.refreshed.network.NetworkService;
 import xyz.jienan.refreshed.network.entity.ArticlesBean;
 import xyz.jienan.refreshed.network.entity.NewsTopicsRequest;
 
+import static xyz.jienan.refreshed.network.NetworkService.USE_CACHE;
+
 /**
  * Created by jienanzhang on 11/01/2018.
  */
@@ -33,11 +35,10 @@ public class NewsListPresenter implements NewsListContract.Presenter {
     }
 
     @Override
-    public void loadList(String newsSource, int type, boolean bypassCache) {
+    public void loadList(String newsSource, int type, String bypassCache) {
         NetworkService.NewsAPI newsAPI = NetworkService.getNewsAPI();
         if (type == R.integer.type_source) {
-            Observable<ArticlesBean> articlesObservable = bypassCache ? newsAPI.getHeadLinesBySourceWithoutCache(newsSource)
-                    : newsAPI.getHeadLinesBySource(newsSource);
+            Observable<ArticlesBean> articlesObservable = newsAPI.getHeadLinesBySource(newsSource, bypassCache);
             articlesObservable.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Observer<ArticlesBean>() {
                 @Override
                 public void onSubscribe(Disposable d) {
@@ -61,7 +62,7 @@ public class NewsListPresenter implements NewsListContract.Presenter {
                 }
             });
         } else if (type == R.integer.type_topic) {
-            Observable<ArticlesBean> alterObsearvable = newsAPI.getCustomQuery("", "en", "2018-01-01");;
+            Observable<ArticlesBean> alterObsearvable = newsAPI.getCustomQuery("", "en", "2018-01-01", bypassCache);
             NewsTopicsRequest topicsRequest = dbManger.getTopicsRequest(newsSource);
             String query = "", category = "";
             if (topicsRequest != null) {
@@ -69,18 +70,15 @@ public class NewsListPresenter implements NewsListContract.Presenter {
                     category = topicsRequest.getCategory();
                 } else {
                     query = topicsRequest.getQ();
-                    alterObsearvable = bypassCache ? newsAPI.getCustomQueryWithoutCache(query, topicsRequest.getLanguage(), "2018-01-01")
-                            : newsAPI.getCustomQuery(query, topicsRequest.getLanguage(), "2018-01-01");
+                    alterObsearvable = newsAPI.getCustomQuery(query, topicsRequest.getLanguage(), "2018-01-01", bypassCache);
                 }
             } else {
                 topicsRequest = new NewsTopicsRequest();
                 query = newsSource;
-                alterObsearvable = bypassCache ? newsAPI.getCustomQueryWithoutCache(query, topicsRequest.getLanguage(), "2018-01-01")
-                        : newsAPI.getCustomQuery(query, topicsRequest.getLanguage(), "2018-01-01");
+                alterObsearvable = newsAPI.getCustomQuery(query, topicsRequest.getLanguage(), "2018-01-01", bypassCache);
             }
 
-            Observable<ArticlesBean> articlesObservable = bypassCache ? newsAPI.getTopicsWithoutCache(query, category)
-                    : newsAPI.getTopics(query, category);
+            Observable<ArticlesBean> articlesObservable = newsAPI.getTopics(query, category, bypassCache);
             final Observable<ArticlesBean> finalAlterObservable = alterObsearvable;
             articlesObservable.subscribeOn(Schedulers.io()).flatMap(new Function<ArticlesBean, ObservableSource<ArticlesBean>>() {
                 @Override

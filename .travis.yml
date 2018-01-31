@@ -21,12 +21,12 @@ script:
 deploy:
   provider: releases
   api_key:
-    secure: QIINSt1nCJvRYz6bCWCgBhdHEnvb2qD3IvGtneonEjub8cREIS/dFbZ9iu/n0HrjRWy39j088HkT2DeMIr2GI3Q7TD3uKSf8jzlcijVNhFi7p4gGaC4x1mXeI1mLqcR/0RaaEBLs6hf1UkPBclrwejUiaO9cQ7adlcvw+rhyMS7+gzkQx7yekOwT4rD6Tl0dRTABVLFCceUELdvDdMV++NK9fE7/kA9hAIRdo0oEhU2G/Jd2g9w2Cjb868l8W5K1AR4NiaUqmUdnYrUrO1yEs6RMKzvvngJCAh8BGvxMDNCsaOhZrKnAK8z4TKJtv9daTyXUXJnNXRY+N4EC/HGobnBa2mpWT3TGMv/xnCBCDjmyxeq72uE0WrDJcGUy666ukWqULXDYFLOTRlS0khuxVgj2t4x6s170dI+JJPOCqySJ6VuDv3ZsPGZ66QZP3Y5ZZ36+SV3lriTWv6AwhrPO+GmOCtfMsaSDFelXbe1s/vB1URTeNfJWxoyY5g4/0WdDiNHMjmmI4sAP8lHWPacYEGPKe/0qBReQHXrvZlojY81IHcSae3QTazWK6A5xW61SXSNRKcxEvmLINHtIy8xDZZ13IPK4topr4hrmsxVHKR5dF06h+td0eu8oSzjyAejsWbMf0qnkbVR1edtbJCCtdLEYSAtQOgBkJiWpxmcbPOo=
+    secure: LsOsKwTkp2OyUKuxo5qqcSH8atWOWu3HJZ/WpqOjNV/9oa77TnN8ewam+G/tOTz3TmE3AVfuEH1GLZsMJq6pe/XyY1vN+ApJSmcWKk2IlhbGpPmGTVVakh2Rx39dec4BhZmCrjaONgcXhM+bV7xSQXLzsj8XTgSKT4r9EGMaW9OZPaJuciO/zDR3cByF6Tcojbhu9nusMj1HK/DNbj83xGUocDhFDgSymXBeb1I/Gy75J6leCwtBG4ykShq5NUhUfTplip1kp9F8izY+PnfiNZqFzG7m0/Ra5A+bKznD0YmdIzdBJu8hUoP1i1Fsu7W2YKo2Vn0y+pPP11xT9JIqDY9owtkmtFgIUGxn23uN7kl2PZzSrFqzLLG1p8Q0Jk52+UaX+quXc1XMYF7ySM+E0nR8LBcy2Ip+sUZorKv7+2Z37sDcxS50GgLRU46T/iTdGeZR7C8T6stMUxD3fNny+rhZ621xj+WfiIrur1xALoiludrrPCPozQb1IIdxLWOXfMgwBJQPVlsAXDBqzcxMGOob49gdZFWZZI2qk9VDIT/igItEuhf/kAwH6d8cBcVsKUgBhuVYR+sLBmNS67EpXDQFn+RSQu5ElDwtGlVgv/H+TLdrvnUgtBJJhdj99kMUEn1xeTXCqkQQPNNAFgtxDxL2uhOslOGwlYh813PUK+M=
   file_glob: true
-  file: pushpull/build/outputs/apk/release/*.apk
+  file: refreshed/build/outputs/apk/release/*.apk
   skip_cleanup: true
-  on:
-    tags: true
-    all_branches: true
+    on:
+      tags: true
+      all_branches: true
 after_deploy:
 - dropbox-deployment

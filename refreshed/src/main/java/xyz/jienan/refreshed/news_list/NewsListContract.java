@@ -18,6 +18,6 @@ public class NewsListContract {
          * @param type        type_source or type_topic
          * @param bypassCache
          */
-        void loadList(String newsSource, int type, boolean bypassCache);
+        void loadList(String newsSource, int type, String bypassCache);
     }
 }

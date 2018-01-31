@@ -22,6 +22,7 @@ import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.Header;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
 import retrofit2.http.Query;
@@ -45,6 +46,9 @@ public class NetworkService {
     private static final String HOST = "https://newsapi.org/v2/";
     public static final String HOST_IMAGE_PROXY = "http://130.211.211.220:3002/images";
     public static final String HOST_TOPICS_SEARCH = "http://130.211.211.220:3002/topic";
+    public static final String BYPASS_CACHE = "1";
+    public static final String USE_CACHE = "2";
+
 
     private static NewsAPI newsAPI;
 
@@ -167,29 +171,16 @@ public class NetworkService {
         // Headline section
         @Headers("cacheable: 3600")
         @GET("top-headlines")
-        Observable<ArticlesBean> getHeadLinesBySource(@Query("sources") String sources);
-
-        @Headers({"cacheable: 3600", "bypass: 1"})
-        @GET("top-headlines")
-        Observable<ArticlesBean> getHeadLinesBySourceWithoutCache(@Query("sources") String sources);
+        Observable<ArticlesBean> getHeadLinesBySource(@Query("sources") String sources, @Header("bypass") String bypass);
 
         // Topic section
         @Headers("cacheable: 3600")
         @GET("top-headlines?country=us")
-        Observable<ArticlesBean> getTopics(@Query("q") String query, @Query("category") String category);
-
-        // Topic section
-        @Headers({"cacheable: 3600", "bypass: 1"})
-        @GET("top-headlines?country=us")
-        Observable<ArticlesBean> getTopicsWithoutCache(@Query("q") String query, @Query("category") String category);
+        Observable<ArticlesBean> getTopics(@Query("q") String query, @Query("category") String category, @Header("bypass") String bypass);
 
         @Headers("cacheable: 3600")
         @GET("everything?sortBy=relevancy")
-        Observable<ArticlesBean> getCustomQuery(@Query("q") String query, @Query("language") String language, @Query("from") String from);
-
-        @Headers({"cacheable: 3600", "bypass: 1"})
-        @GET("everything?sortBy=relevancy")
-        Observable<ArticlesBean> getCustomQueryWithoutCache(@Query("q") String query, @Query("language") String language, @Query("from") String from);
+        Observable<ArticlesBean> getCustomQuery(@Query("q") String query, @Query("language") String language, @Query("from") String from,  @Header("bypass") String bypass);
 
         // Source selection
         @Headers("cacheable: 86400")
