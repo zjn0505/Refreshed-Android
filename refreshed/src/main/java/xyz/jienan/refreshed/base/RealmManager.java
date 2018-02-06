@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import io.realm.OrderedRealmCollectionSnapshot;
 import io.realm.Realm;
 import io.realm.RealmModel;
 import io.realm.RealmResults;
@@ -312,5 +313,9 @@ public class RealmManager implements IDBManager {
         } else {
             return R.integer.type_topic;
         }
+    }
+
+    public List<NewsTopicsRequest> createCopy(List<NewsTopicsRequest> topicsList) {
+        return realm.copyFromRealm(topicsList);
     }
 }

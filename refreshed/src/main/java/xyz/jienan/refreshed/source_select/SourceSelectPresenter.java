@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
@@ -105,7 +106,63 @@ public class SourceSelectPresenter implements SourceSelectContract.Presenter {
     @Override
     public void loadTopics() {
         List<NewsTopicsRequest> topicsList = dbManger.getTopics(true);
-        mView.renderSources(topicsList);
+        Observable.just(topicsList).subscribeOn(AndroidSchedulers.mainThread()).flatMap(new Function<List<NewsTopicsRequest>, ObservableSource<List<NewsTopicsRequest>>>() {
+            @Override
+            public ObservableSource<List<NewsTopicsRequest>> apply(List<NewsTopicsRequest> topicsList) throws Exception {
+                topicsList = new RealmManager().createCopy(topicsList);
+                return Observable.just(topicsList);
+            }
+        }).observeOn(Schedulers.io()).flatMap(new Function<List<NewsTopicsRequest>, Observable<IconsBean>>() {
+            @Override
+            public Observable<IconsBean> apply(List<NewsTopicsRequest> topicsList) throws Exception {
+                JSONArray param = new JSONArray();
+                for (NewsTopicsRequest topic : topicsList) {
+                    param.put(topic.getQ());
+                }
+                RequestBody body = RequestBody.create(MediaType.parse("application/json; charset=utf-8"),(param).toString());
+                return NetworkService.getNewsAPI().getFeatureImage(HOST_IMAGE_PROXY, body);
+            }
+        }, new BiFunction<List<NewsTopicsRequest>, IconsBean, List<NewsTopicsRequest>>() {
+            @Override
+            public List<NewsTopicsRequest> apply(List<NewsTopicsRequest> topicsList, IconsBean iconsBean) throws Exception {
+                HashMap<String, String> imgUrlMap = new HashMap<>();
+                for (int i = 0; i < iconsBean.getSize(); i++) {
+                    IconsBean.DataBean bean = iconsBean.getData().get(i);
+                    imgUrlMap.put(bean.getSource(), bean.getImgUrl());
+                }
+
+                for (NewsTopicsRequest topic : topicsList) {
+                    String topicName = topic.getQ();
+                    topic.setImgUrl(imgUrlMap.get(topicName));
+                }
+                return topicsList;
+            }
+        }).observeOn(AndroidSchedulers.mainThread()).subscribe(new Observer<List<NewsTopicsRequest>>() {
+            @Override
+            public void onSubscribe(Disposable d) {
+
+            }
+
+            @Override
+            public void onNext(List<NewsTopicsRequest> newsTopicsRequests) {
+                if (newsTopicsRequests != null && newsTopicsRequests.size() > 0) {
+                    mView.renderSources(newsTopicsRequests);
+                } else {
+                    mView.renderSources(null);
+                }
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                mView.renderSources(null);
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onComplete() {
+
+            }
+        });
     }
 
     @Override

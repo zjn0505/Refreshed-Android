@@ -71,11 +71,11 @@ public class SourcesSelectActivity extends AppCompatActivity implements SourceSe
         if (R.integer.type_source == type) {
             setTitle(getString(R.string.select_sources));
             mPresenter.loadSources();
-            stateful.showLoading();
         } else {
             setTitle(getString(R.string.select_topics));
             mPresenter.loadTopics();
         }
+        stateful.showLoading();
     }
 
     @Override
@@ -94,7 +94,11 @@ public class SourcesSelectActivity extends AppCompatActivity implements SourceSe
             stateful.showError(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mPresenter.loadSources();
+                    if (R.integer.type_source == type) {
+                        mPresenter.loadSources();
+                    } else {
+                        mPresenter.loadTopics();
+                    }
                     stateful.showLoading();
                 }
             });
