@@ -8,4 +8,6 @@ public interface ITabEntity {
     String getName();
     String getId();
     int getType();
+    int getIndex();
+    String getImgUrl();
 }

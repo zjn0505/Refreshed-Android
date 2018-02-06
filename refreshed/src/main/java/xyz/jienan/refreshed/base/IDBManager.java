@@ -2,6 +2,7 @@ package xyz.jienan.refreshed.base;
 
 import java.util.List;
 
+import xyz.jienan.refreshed.network.entity.ITabEntity;
 import xyz.jienan.refreshed.network.entity.NewsSourceBean;
 import xyz.jienan.refreshed.network.entity.NewsTopicsRequest;
 
@@ -21,6 +22,9 @@ public interface IDBManager {
      */
     int updateIndex(List<NewsSourceBean> sourceList, boolean wasSelected, int position);
 
+    List<? extends ITabEntity> reorderByIndexForTopics(List<NewsTopicsRequest> sourceList);
+
+    int updateIndexForTopics(List<NewsTopicsRequest> sourceList, boolean wasSelected, int position);
 
     /**
      * Get the list of saved topics
@@ -37,4 +41,8 @@ public interface IDBManager {
     NewsTopicsRequest getTopicsRequest(String newsSource);
 
     boolean addTopics(String topics);
+
+    void updateListForReordering(List<NewsSourceBean> sourceList);
+
+    void updateListForReorderingForTopics(List<NewsTopicsRequest> sourceList);
 }

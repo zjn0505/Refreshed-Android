@@ -3,6 +3,7 @@ package xyz.jienan.refreshed.ui;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.util.Log;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
@@ -32,7 +33,13 @@ public class NewsPagerAdapter extends FragmentStatePagerAdapter {
     public int getItemPosition(Object object) {
         INewsListFragmentListener fragment = (INewsListFragmentListener) object;
         String title = fragment.getFragmentName();
-        return getItemPosition(title);
+        int i = getItemPosition(title);
+        if (i == POSITION_NONE) {
+            Log.d("pager", title + " recreated");
+        } else {
+            Log.d("pager", title + " load from position " + i);
+        }
+        return POSITION_NONE;
     }
 
     @Override

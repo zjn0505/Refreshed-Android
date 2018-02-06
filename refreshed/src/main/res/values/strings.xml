@@ -14,6 +14,8 @@
 
     <string name="keep_at_least_one_source">Please keep at least one source</string>
     <string name="search_hint">Search for your topics</string>
+    <string name="select_sources">Select Sources</string>
+    <string name="select_topics">Select Topics</string>
 
 
 </resources>

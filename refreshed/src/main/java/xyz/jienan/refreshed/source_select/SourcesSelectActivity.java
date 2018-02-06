@@ -7,7 +7,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
@@ -19,9 +22,11 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.gturedi.views.StatefulLayout;
 
+import java.util.Collections;
 import java.util.List;
 
 import xyz.jienan.refreshed.R;
+import xyz.jienan.refreshed.network.entity.ITabEntity;
 import xyz.jienan.refreshed.network.entity.NewsSourceBean;
 import xyz.jienan.refreshed.ui.GridItemDecoration;
 
@@ -41,13 +46,14 @@ public class SourcesSelectActivity extends AppCompatActivity implements SourceSe
     private SourceSelectContract.Presenter mPresenter;
     GridLayoutManager layoutManager;
     private Context mContext;
+    private int type;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mContext = this;
         setContentView(R.layout.activity_source_select);
-        setTitle("Select Sources");
+        type = getIntent().getIntExtra("type", R.integer.type_source);
         mPresenter = new SourceSelectPresenter(this);
         rvSources = findViewById(R.id.rv_source_list);
         stateful = findViewById(R.id.stateful);
@@ -58,12 +64,32 @@ public class SourcesSelectActivity extends AppCompatActivity implements SourceSe
         mAdapter = new SourcesAdapter(null);
         rvSources.setLayoutManager(layoutManager);
         rvSources.setAdapter(mAdapter);
-        mPresenter.loadSources();
-        stateful.showLoading();
+
+        SourceItemTouchHelperCallback dragCallback = new SourceItemTouchHelperCallback(mAdapter);
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(dragCallback);
+        itemTouchHelper.attachToRecyclerView(rvSources);
+        if (R.integer.type_source == type) {
+            setTitle(getString(R.string.select_sources));
+            mPresenter.loadSources();
+            stateful.showLoading();
+        } else {
+            setTitle(getString(R.string.select_topics));
+            mPresenter.loadTopics();
+        }
     }
 
     @Override
-    public void renderSources(List<NewsSourceBean> sources) {
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void renderSources(List<? extends ITabEntity> sources) {
         if (sources == null) {
             stateful.showError(new View.OnClickListener() {
                 @Override
@@ -75,13 +101,13 @@ public class SourcesSelectActivity extends AppCompatActivity implements SourceSe
         } else if (sources.size() == 0){
             stateful.showEmpty();
         } else {
-            mAdapter.updateList(sources);
+            mAdapter.updateList((List<ITabEntity>) sources);
             stateful.showContent();
         }
     }
 
     @Override
-    public void renderSourcesWithReorder(List<NewsSourceBean> sources, int from, int to) {
+    public void renderSourcesWithReorder(List<? extends ITabEntity> sources, int from, int to) {
         if (sources == null) {
             stateful.showError(new View.OnClickListener() {
                 @Override
@@ -93,13 +119,31 @@ public class SourcesSelectActivity extends AppCompatActivity implements SourceSe
         } else if (sources.size() == 0){
             stateful.showEmpty();
         } else {
-            mAdapter.updateList(sources, from, to);
+            mAdapter.updateList((List<ITabEntity>) sources, from, to);
             stateful.showContent();
         }
     }
 
 
-    private class SourcesAdapter extends RecyclerView.Adapter<SourcesAdapter.ViewHolder> {
+    private class SourcesAdapter extends RecyclerView.Adapter<SourcesAdapter.ViewHolder> implements SourceItemTouchHelperCallback.ItemMoveListener {
+
+        @Override
+        public boolean movable(int position) {
+            return sourceList.get(position).getIndex() != -1;
+        }
+
+        @Override
+        public void onItemMove(int from, int to) {
+            if (to > getMaxSelectedIndex()) {
+                to = getMaxSelectedIndex();
+            }
+            ITabEntity source = sourceList.get(from);
+            sourceList.remove(source);
+            sourceList.add(to, source);
+            notifyItemMoved(from, to);
+            mPresenter.reorderSelected(sourceList, from, to);
+            setResult(RESULT_OK);
+        }
 
         public class ViewHolder extends RecyclerView.ViewHolder {
 
@@ -120,27 +164,20 @@ public class SourcesSelectActivity extends AppCompatActivity implements SourceSe
 
         }
 
-        private List<NewsSourceBean> sourceList;
+        private List<ITabEntity> sourceList;
 
-        public SourcesAdapter(List<NewsSourceBean> list) {
+        public SourcesAdapter(List<ITabEntity> list) {
             sourceList = list;
         }
 
-        public void updateList(List<NewsSourceBean> list) {
+        public void updateList(List<ITabEntity> list) {
             sourceList = list;
             notifyDataSetChanged();
         }
 
-        public void updateList(List<NewsSourceBean> list, int from, int to) {
+        public void updateList(List<ITabEntity> list, int from, int to) {
             sourceList = list;
-            int visible = layoutManager.findFirstVisibleItemPosition();
-            View view = layoutManager.getChildAt(visible);
-            if (view != null) {
-                int offset = view.getTop();
-                layoutManager.scrollToPositionWithOffset(visible, offset);
-            }
             notifyItemMoved(from, to);
-
         }
 
         @Override
@@ -151,9 +188,8 @@ public class SourcesSelectActivity extends AppCompatActivity implements SourceSe
 
         @Override
         public void onBindViewHolder(final SourcesAdapter.ViewHolder holder, int position) {
-            final NewsSourceBean bean = sourceList.get(position);
+            final ITabEntity bean = sourceList.get(position);
             holder.mTvName.setText(bean.getName());
-            holder.mTvDescription.setText(bean.getDescription());
             holder.mCkbSelect.setChecked(bean.getIndex() > -1);
             holder.mView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -183,6 +219,17 @@ public class SourcesSelectActivity extends AppCompatActivity implements SourceSe
         @Override
         public int getItemCount() {
             return sourceList == null ? 0 : sourceList.size();
+        }
+
+
+        private int getMaxSelectedIndex() {
+            for (int i = 0; i< sourceList.size(); i++) {
+                ITabEntity bean = sourceList.get(i);
+                if (bean.getIndex() == -1) {
+                    return --i;
+                }
+            }
+            return -1;
         }
     }
 }

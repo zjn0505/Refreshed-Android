@@ -28,6 +28,7 @@ import xyz.jienan.refreshed.base.RefreshedApplication;
 import xyz.jienan.refreshed.island.NewsIslandActivity;
 import xyz.jienan.refreshed.network.entity.NewsTopicsRequest;
 import xyz.jienan.refreshed.network.entity.TopicsSearchBean;
+import xyz.jienan.refreshed.source_select.SourcesSelectActivity;
 import xyz.jienan.refreshed.sources_fragment.BaseSourcesFragment;
 import xyz.jienan.refreshed.ui.NewsPagerAdapter;
 
@@ -116,8 +117,14 @@ public class TopicsFragment extends BaseSourcesFragment implements TopicsContrac
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_search: {
-            }
+            case R.id.action_search:
+                break;
+            case R.id.action_sources:
+                Intent intent = new Intent(getActivity(), SourcesSelectActivity.class);
+                intent.putExtra("type", R.integer.type_topic);
+                startActivityForResult(intent, 1);
+                break;
+
         }
 
         return true;
@@ -126,9 +133,9 @@ public class TopicsFragment extends BaseSourcesFragment implements TopicsContrac
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQ_ISLAND_ACTIVITY) {
+        if (requestCode == REQ_ISLAND_ACTIVITY || requestCode == 1) {
             if (resultCode == RESULT_OK) {
-                mPresenter.loadTopics(true);
+                mPresenter.loadTopics(false);
             }
         }
     }

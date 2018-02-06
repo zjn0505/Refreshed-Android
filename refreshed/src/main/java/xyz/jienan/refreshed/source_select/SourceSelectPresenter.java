@@ -14,12 +14,15 @@ import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
+import xyz.jienan.refreshed.R;
 import xyz.jienan.refreshed.base.IDBManager;
 import xyz.jienan.refreshed.base.RealmManager;
 import xyz.jienan.refreshed.network.NetworkService;
+import xyz.jienan.refreshed.network.entity.ITabEntity;
 import xyz.jienan.refreshed.network.entity.IconsBean;
 import xyz.jienan.refreshed.network.entity.NewsSourceBean;
 import xyz.jienan.refreshed.network.entity.NewsSourcesBean;
+import xyz.jienan.refreshed.network.entity.NewsTopicsRequest;
 
 import static xyz.jienan.refreshed.network.NetworkService.HOST_IMAGE_PROXY;
 
@@ -100,10 +103,36 @@ public class SourceSelectPresenter implements SourceSelectContract.Presenter {
     }
 
     @Override
-    public void changeSelection(List<NewsSourceBean> sourceList, final boolean wasSelected, final int position) {
-        int toPosition = dbManger.updateIndex(sourceList, wasSelected, position);
-        mView.renderSourcesWithReorder(dbManger.reorderByIndex(sourceList), position, toPosition);
+    public void loadTopics() {
+        List<NewsTopicsRequest> topicsList = dbManger.getTopics(true);
+        mView.renderSources(topicsList);
     }
 
+    @Override
+    public void changeSelection(List<? extends ITabEntity> sourceList, final boolean wasSelected, final int position) {
+        if (checkType(sourceList) == R.integer.type_source) {
+            int toPosition = dbManger.updateIndex((List<NewsSourceBean>) sourceList, wasSelected, position);
+            mView.renderSourcesWithReorder(dbManger.reorderByIndex((List<NewsSourceBean>) sourceList), position, toPosition);
+        } else {
+            int toPosition = dbManger.updateIndexForTopics((List<NewsTopicsRequest>) sourceList, wasSelected, position);
+            mView.renderSourcesWithReorder(dbManger.reorderByIndexForTopics((List<NewsTopicsRequest>) sourceList), position, toPosition);
+        }
 
+    }
+
+    @Override
+    public void reorderSelected(List<? extends ITabEntity> sourceList, int from, int to) {
+        if (checkType(sourceList) == R.integer.type_source)
+            dbManger.updateListForReordering((List<NewsSourceBean>) sourceList);
+        else
+            dbManger.updateListForReorderingForTopics((List<NewsTopicsRequest>) sourceList);
+    }
+
+    private int checkType(List<? extends ITabEntity> sourceList) {
+        if (sourceList != null && !sourceList.isEmpty() && sourceList.get(0) instanceof NewsSourceBean) {
+            return R.integer.type_source;
+        } else {
+            return R.integer.type_topic;
+        }
+    }
 }

@@ -9,14 +9,13 @@
         android:layout_height="0dp"
         android:layout_weight="1"/>
 
-    <TextView
+    <ImageView
         android:id="@+id/tv_add_topics"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="+"
+        android:layout_height="40dp"
         android:gravity="center"
         android:padding="6dp"
-        android:textSize="24dp"
+        android:src="@drawable/ic_add"
         android:textStyle="bold"
         android:textColor="#FFF"
         android:background="@color/colorPrimary"/>

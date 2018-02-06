@@ -19,14 +19,11 @@ public class NewsTopicsRequest extends RealmObject implements ITabEntity {
 
     @PrimaryKey
     private String q;
-
     private String category;
-
     private String country = "us";
-
     private String language = "en";
-
     private int index = -1;
+    private String imgUrl;
 
     @Override
     public String getName() {
@@ -76,6 +73,15 @@ public class NewsTopicsRequest extends RealmObject implements ITabEntity {
 
     public void setLanguage(String language) {
         this.language = language;
+    }
+
+    @Override
+    public String getImgUrl() {
+        return imgUrl;
+    }
+
+    public void setImgUrl(String imgUrl) {
+        this.imgUrl = imgUrl;
     }
 
     public static class TopicIndexComparator implements Comparator<NewsTopicsRequest> {

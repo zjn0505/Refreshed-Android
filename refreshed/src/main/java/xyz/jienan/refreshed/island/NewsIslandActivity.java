@@ -9,7 +9,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import xyz.jienan.refreshed.R;
@@ -21,7 +21,7 @@ import xyz.jienan.refreshed.news_list.NewsListFragment;
 
 public class NewsIslandActivity extends AppCompatActivity implements NewsIslandContract.View{
 
-    private TextView tvAddTopics;
+    private ImageView tvAddTopics;
     private NewsIslandContract.Presenter mPresenter;
 
     @Override
@@ -37,23 +37,23 @@ public class NewsIslandActivity extends AppCompatActivity implements NewsIslandC
             FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
             ft.add(R.id.news_list_container, newsFragment).commit();
         }
+        tvAddTopics = findViewById(R.id.tv_add_topics);
         if (mPresenter.ifTopicsExist(source)) {
             tvAddTopics.setVisibility(View.GONE);
-        }
-
-        tvAddTopics = findViewById(R.id.tv_add_topics);
-        tvAddTopics.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mPresenter.addTopics(source)) {
-                    Toast.makeText(NewsIslandActivity.this, "Topic " + source + " added", Toast.LENGTH_SHORT).show();
-                    tvAddTopics.setVisibility(View.GONE);
-                    setResult(RESULT_OK);
-                } else {
-                    Toast.makeText(NewsIslandActivity.this, "Failed to add topics", Toast.LENGTH_SHORT).show();
+        } else {
+            tvAddTopics.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (mPresenter.addTopics(source)) {
+                        Toast.makeText(NewsIslandActivity.this, "Topic " + source + " added", Toast.LENGTH_SHORT).show();
+                        tvAddTopics.setVisibility(View.GONE);
+                        setResult(RESULT_OK);
+                    } else {
+                        Toast.makeText(NewsIslandActivity.this, "Failed to add topics", Toast.LENGTH_SHORT).show();
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     @Override

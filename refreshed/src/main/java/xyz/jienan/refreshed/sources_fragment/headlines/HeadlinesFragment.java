@@ -74,7 +74,6 @@ public class HeadlinesFragment extends BaseSourcesFragment implements HeadlinesC
                 }
             });
         }
-
     }
 
     @Override
@@ -88,10 +87,10 @@ public class HeadlinesFragment extends BaseSourcesFragment implements HeadlinesC
         switch (item.getItemId()) {
             case R.id.action_sources: {
                 Intent intent = new Intent(getActivity(), SourcesSelectActivity.class);
+                intent.putExtra("type", R.integer.type_source);
                 startActivityForResult(intent, 1);
             }
         }
-
         return true;
     }
 
