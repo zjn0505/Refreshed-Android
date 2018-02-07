@@ -24,13 +24,16 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
 
@@ -55,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
 
     private DrawerLayout mDrawerLayout;
     private NavigationView navigationView;
+    private NestedScrollView mDrawerScroller;
     private RecyclerView rvHeadlines;
     private RecyclerView rvTopics;
     private DrawerAdapter headlinesAdapter;
@@ -78,6 +82,7 @@ public class MainActivity extends AppCompatActivity {
         GlideFaceDetector.initialize(this);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         navigationView = (NavigationView) findViewById(R.id.nav_view);
+        mDrawerScroller = findViewById(R.id.drawer_scroller);
         rvHeadlines = findViewById(R.id.rv_headlines);
         rvTopics = findViewById(R.id.rv_topics);
         drawerSubItemClickListener = new DrawerSubItemClickListener();
@@ -127,7 +132,34 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 });
+        mDrawerScroller.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                Log.d("Touch", "onTouch: scroller " + event.getAction());
+                if (event.getAction() == MotionEvent.ACTION_MOVE || event.getAction() == MotionEvent.ACTION_DOWN) {
+                    blockTouch = true;
+                } else if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
+                    blockTouch = false;
+                }
+                return false;
+            }
+        });
+        mDrawerLayout.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                Log.d("Touch", "onTouch: drawer " + event.getAction());
+//                if (blockTouch)
+                if (blockTouch && event.getAction() == MotionEvent.ACTION_MOVE) {
+                    Log.d("Touch", "onTouch: drawer blocked");
+                } else if (!blockTouch && event.getAction() == MotionEvent.ACTION_MOVE) {
+                    Log.d("Touch", "onTouch: drawer not blocked");
+                }
+                return blockTouch;
+            }
+        });
     }
+
+    private boolean blockTouch = false;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -219,6 +251,15 @@ public class MainActivity extends AppCompatActivity {
             headlinesAdapter.updateList(items);
         } else if (items.get(0) instanceof NewsTopicsRequest) {
             topicsAdapter.updateList(items);
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
+            mDrawerLayout.closeDrawers();
+        } else {
+            super.onBackPressed();
         }
     }
 }
