@@ -138,7 +138,8 @@ public class SourcesSelectActivity extends AppCompatActivity implements SourceSe
 
         @Override
         public void onItemMove(int from, int to) {
-            if (to > getMaxSelectedIndex()) {
+            int maxIndex = getMaxSelectedIndex();
+            if (to > maxIndex && maxIndex != -1) {
                 to = getMaxSelectedIndex();
             }
             ITabEntity source = sourceList.get(from);
