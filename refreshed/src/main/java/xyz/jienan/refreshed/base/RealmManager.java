@@ -11,6 +11,7 @@ import java.util.List;
 import io.realm.OrderedRealmCollectionSnapshot;
 import io.realm.Realm;
 import io.realm.RealmModel;
+import io.realm.RealmQuery;
 import io.realm.RealmResults;
 import xyz.jienan.refreshed.R;
 import xyz.jienan.refreshed.network.entity.ITabEntity;
@@ -27,9 +28,11 @@ public class RealmManager implements IDBManager {
     private final static String[] RECOMMEND_TOPICS = new String[]{"business", "entertainment", "general", "health", "science", "sports", "technology"};
 
     private Realm realm;
+    private Realm alterRealm;
 
     public RealmManager() {
         realm = Realm.getDefaultInstance();
+        alterRealm = Realm.getDefaultInstance();
     }
 
     @Override
@@ -254,11 +257,13 @@ public class RealmManager implements IDBManager {
     @Override
     public boolean addTopics(String topics) {
         RealmResults results = realm.where(NewsTopicsRequest.class).greaterThan("index", -1).findAll();
-
-        NewsTopicsRequest topicsRequest = new NewsTopicsRequest();
-        topicsRequest.setQ(topics);
-        topicsRequest.setIndex(results.size());
+        NewsTopicsRequest topicsRequest = realm.where(NewsTopicsRequest.class).equalTo("q", topics).findFirst();
         realm.beginTransaction();
+        if (topicsRequest == null) {
+            topicsRequest = new NewsTopicsRequest();
+            topicsRequest.setQ(topics);
+        }
+        topicsRequest.setIndex(results.size());
         realm.insertOrUpdate(topicsRequest);
         try {
             realm.commitTransaction();
@@ -306,6 +311,35 @@ public class RealmManager implements IDBManager {
         });
     }
 
+    @Override
+    public void setForceEverything(final String newsSource) {
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                NewsTopicsRequest topic = realm.where(NewsTopicsRequest.class).equalTo("q", newsSource).findFirst();
+                topic.setForceEverything(true);
+                realm.insertOrUpdate(topic);
+            }
+        });
+    }
+
+    @Override
+    public void adjustTopicsDays(final String newsSource, final int days) {
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                NewsTopicsRequest topic = realm.where(NewsTopicsRequest.class).equalTo("q", newsSource).findFirst();
+                if (topic != null)
+                    topic.setNewsAgeInDays(days);
+                else {
+                    topic = new NewsTopicsRequest();
+                    topic.setNewsAgeInDays(days);
+                    topic.setQ(newsSource);
+                }
+                realm.insertOrUpdate(topic);
+            }
+        });
+    }
 
     private int checkType(List<ITabEntity> sourceList) {
         if (sourceList != null && !sourceList.isEmpty() && sourceList.get(0) instanceof NewsSourceBean) {

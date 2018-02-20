@@ -45,4 +45,8 @@ public interface IDBManager {
     void updateListForReordering(List<NewsSourceBean> sourceList);
 
     void updateListForReorderingForTopics(List<NewsTopicsRequest> sourceList);
+
+    void setForceEverything(String newsSource);
+
+    void adjustTopicsDays(String newsSource, int days);
 }

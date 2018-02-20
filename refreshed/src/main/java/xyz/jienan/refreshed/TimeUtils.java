@@ -27,6 +27,11 @@ public class TimeUtils {
     private static Pattern pUtcPlus = Pattern.compile(REG_TIME_UTC_PLUS);
     private static Pattern pUtcMicroZ = Pattern.compile(REG_TIME_UTC_MICRO_Z);
 
+    public static String getNewsAgedFrom(int newsAgeInDays) {
+        Date date = new Date(new Date().getTime() - newsAgeInDays * 24 * 60 * 60 * 1000L);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        return sdf.format(date);
+    }
 
     public static String convertTimeToString(String utcTime) {
         Date date = convertStringToDate(utcTime);
@@ -45,7 +50,6 @@ public class TimeUtils {
             return null;
         }
     }
-
 
     private static SimpleDateFormat parseTime(final String time) {
         SimpleDateFormat sdf = new SimpleDateFormat();

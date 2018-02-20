@@ -43,6 +43,9 @@
         <meta-data
             android:name="NEWSAPI_API_KEY"
             android:value="${NEWSAPI_API_KEY}" />
+        <meta-data
+            android:name="ALTER_HOST_API_KEY"
+            android:value="${ALTER_HOST_API_KEY}" />
 
     </application>
 

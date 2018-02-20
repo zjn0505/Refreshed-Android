@@ -1,5 +1,7 @@
 package xyz.jienan.refreshed.sources_fragment.topics;
 
+import android.text.TextUtils;
+
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -13,7 +15,7 @@ import xyz.jienan.refreshed.network.NetworkService;
 import xyz.jienan.refreshed.network.entity.NewsTopicsRequest;
 import xyz.jienan.refreshed.network.entity.TopicsSearchBean;
 
-import static xyz.jienan.refreshed.network.NetworkService.HOST_TOPICS_SEARCH;
+import static xyz.jienan.refreshed.network.NetworkService.REQ_TOPICS_SEARCH;
 
 /**
  * Created by jienanzhang on 11/01/2018.
@@ -38,7 +40,9 @@ public class TopicsPresenter implements TopicsContract.Presenter {
 
     @Override
     public void searchTopics(String query) {
-        Observable<List<TopicsSearchBean>> searchObservalbe = NetworkService.getNewsAPI().getTopicsSuggestions(HOST_TOPICS_SEARCH, query);
+        if (TextUtils.isEmpty(query))
+            return;
+        Observable<List<TopicsSearchBean>> searchObservalbe = NetworkService.getNewsAPI().getTopicsSuggestions(REQ_TOPICS_SEARCH, query);
         searchObservalbe.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Observer<List<TopicsSearchBean>>() {
             @Override
             public void onSubscribe(Disposable d) {

@@ -53,6 +53,7 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
     private int type;
     private static boolean isGoogleServiceAvaliable = false;
     private boolean forceBypassCache = false;
+    private int newsDays = 60;
 
     public static NewsListFragment newInstance(String source, String name, int type){
         NewsListFragment newsListFragment = new NewsListFragment();
@@ -69,6 +70,15 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
         NewsListFragment newsListFragment = newInstance(source, name, type);
         Bundle args = newsListFragment.getArguments();
         args.putBoolean("forceBypassCache", forceBypassCache);
+        newsListFragment.setArguments(args);
+        return newsListFragment;
+    }
+
+    public static NewsListFragment newInstance(String source, String name, int type, int newsDays, boolean forceBypassCache){
+        NewsListFragment newsListFragment = newInstance(source, name, type);
+        Bundle args = newsListFragment.getArguments();
+        args.putBoolean("forceBypassCache", forceBypassCache);
+        args.putInt("newsDays", newsDays);
         newsListFragment.setArguments(args);
         return newsListFragment;
     }
@@ -93,6 +103,7 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
         title = args.getString("name");
         type = args.getInt("type");
         forceBypassCache = args.getBoolean("forceBypassCache", false);
+        newsDays = args.getInt("newsDays", 60);
     }
 
     @Nullable
@@ -126,7 +137,7 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mPresenter.loadList(newsSource, type, forceBypassCache ? BYPASS_CACHE : USE_CACHE);
+        mPresenter.loadList(newsSource, type, newsDays, forceBypassCache ? BYPASS_CACHE : USE_CACHE);
         stateful.showLoading();
     }
 
@@ -140,7 +151,7 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
     @Override
     public void onRefresh() {
         refreshLayout.setRefreshing(true);
-        mPresenter.loadList(newsSource, type, BYPASS_CACHE);
+        mPresenter.loadList(newsSource, type, newsDays, BYPASS_CACHE);
     }
 
     @Override
@@ -165,7 +176,7 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
             stateful.showError(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mPresenter.loadList(newsSource, type, BYPASS_CACHE);
+                    mPresenter.loadList(newsSource, type, newsDays, BYPASS_CACHE);
                     stateful.showLoading();
                 }
             });

@@ -23,6 +23,7 @@ public class NewsIslandActivity extends AppCompatActivity implements NewsIslandC
 
     private ImageView tvAddTopics;
     private NewsIslandContract.Presenter mPresenter;
+    private String source;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -31,12 +32,9 @@ public class NewsIslandActivity extends AppCompatActivity implements NewsIslandC
         setContentView(R.layout.activity_island);
         Intent intent = getIntent();
         final String source = intent.getStringExtra("source");
+        mPresenter.checkNewsDays(source);
         setTitle(source);
-        if (savedInstanceState == null) {
-            Fragment newsFragment = NewsListFragment.newInstance(source, source, R.integer.type_topic, true);
-            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-            ft.add(R.id.news_list_container, newsFragment).commit();
-        }
+        this.source = source;
         tvAddTopics = findViewById(R.id.tv_add_topics);
         if (mPresenter.ifTopicsExist(source)) {
             tvAddTopics.setVisibility(View.GONE);
@@ -64,5 +62,12 @@ public class NewsIslandActivity extends AppCompatActivity implements NewsIslandC
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onNewsDaysReady(int days) {
+        Fragment newsFragment = NewsListFragment.newInstance(source, source, R.integer.type_topic, days, true);
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.add(R.id.news_list_container, newsFragment).commit();
     }
 }

@@ -16,11 +16,14 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.Body;
+import retrofit2.http.Field;
+import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.Headers;
@@ -44,8 +47,11 @@ import static xyz.jienan.refreshed.MetaUtils.NEWSAPI_API_KEY;
 public class NetworkService {
 
     private static final String HOST = "https://newsapi.org/v2/";
-    public static final String HOST_IMAGE_PROXY = "http://130.211.211.220:3002/images";
-    public static final String HOST_TOPICS_SEARCH = "http://130.211.211.220:3002/topic";
+    private static final String HOST_ALTER = "http://130.211.211.220:3002/";
+    public static final String REQ_IMAGE_PROXY = HOST_ALTER + "images";
+    public static final String REQ_TOPICS_SEARCH = HOST_ALTER + "topic-suggest";
+    public static final String REQ_UPDATE_TOPICS = HOST_ALTER + "update-topic";
+    public static final String REQ_TOPICS_DAYS = HOST_ALTER + "topic-news-days";
     public static final String BYPASS_CACHE = "1";
     public static final String USE_CACHE = "2";
 
@@ -57,8 +63,11 @@ public class NetworkService {
         httpClientBuilder.addInterceptor(new Interceptor() {
             @Override
             public Response intercept(Chain chain) throws IOException {
-                Request request = chain.request().newBuilder()
-                        .header("X-Api-Key", MetaUtils.getMeta(NEWSAPI_API_KEY)).build();
+                Request request = chain.request();
+                if (request.url().toString().startsWith(HOST)) {
+                    request = chain.request().newBuilder()
+                            .header("X-Api-Key", MetaUtils.getMeta(NEWSAPI_API_KEY)).build();
+                }
                 return chain.proceed(request);
             }
         });
@@ -197,5 +206,13 @@ public class NetworkService {
         @Headers("cacheable: 600")
         @GET
         Observable<List<TopicsSearchBean>> getTopicsSuggestions(@Url String url, @Query("q") String query);
+
+        @Headers("cacheable: 3600")
+        @GET
+        Observable<ResponseBody> getTopicNewsDays(@Url String url, @Query("q") String query);
+
+        @FormUrlEncoded
+        @POST
+        Observable<ResponseBody> updateTopicNewsDays(@Url String url, @Field("topic") String topic, @Field("newsDays") int newsDays, @Header("x-api-key") String apiKey);
     }
 }

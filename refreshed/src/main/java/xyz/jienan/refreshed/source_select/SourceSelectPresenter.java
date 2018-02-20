@@ -1,6 +1,7 @@
 package xyz.jienan.refreshed.source_select;
 
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.List;
@@ -25,7 +26,7 @@ import xyz.jienan.refreshed.network.entity.NewsSourceBean;
 import xyz.jienan.refreshed.network.entity.NewsSourcesBean;
 import xyz.jienan.refreshed.network.entity.NewsTopicsRequest;
 
-import static xyz.jienan.refreshed.network.NetworkService.HOST_IMAGE_PROXY;
+import static xyz.jienan.refreshed.network.NetworkService.REQ_IMAGE_PROXY;
 
 /**
  * Created by jienanzhang on 11/01/2018.
@@ -51,10 +52,13 @@ public class SourceSelectPresenter implements SourceSelectContract.Presenter {
 
                 JSONArray param = new JSONArray();
                 for (NewsSourceBean source : newsSourcesBean.getSources()) {
-                    param.put(source.getName());
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("type", "source");
+                    jsonObject.put("query", source.getName());
+                    param.put(jsonObject);
                 }
                 RequestBody body = RequestBody.create(MediaType.parse("application/json; charset=utf-8"),(param).toString());
-                return NetworkService.getNewsAPI().getFeatureImage(HOST_IMAGE_PROXY, body);
+                return NetworkService.getNewsAPI().getFeatureImage(REQ_IMAGE_PROXY, body);
             }
         }, new BiFunction<NewsSourcesBean, IconsBean, NewsSourcesBean>() {
             @Override
@@ -117,10 +121,13 @@ public class SourceSelectPresenter implements SourceSelectContract.Presenter {
             public Observable<IconsBean> apply(List<NewsTopicsRequest> topicsList) throws Exception {
                 JSONArray param = new JSONArray();
                 for (NewsTopicsRequest topic : topicsList) {
-                    param.put(topic.getQ());
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("type", "topic");
+                    jsonObject.put("query", topic.getQ());
+                    param.put(jsonObject);
                 }
                 RequestBody body = RequestBody.create(MediaType.parse("application/json; charset=utf-8"),(param).toString());
-                return NetworkService.getNewsAPI().getFeatureImage(HOST_IMAGE_PROXY, body);
+                return NetworkService.getNewsAPI().getFeatureImage(REQ_IMAGE_PROXY, body);
             }
         }, new BiFunction<List<NewsTopicsRequest>, IconsBean, List<NewsTopicsRequest>>() {
             @Override

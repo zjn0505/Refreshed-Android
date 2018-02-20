@@ -24,6 +24,8 @@ public class NewsTopicsRequest extends RealmObject implements ITabEntity {
     private String language = "en";
     private int index = -1;
     private String imgUrl;
+    private int newsAgeInDays = 60;
+    private boolean forceEverything = false; // force to use everything endpoint
 
     @Override
     public String getName() {
@@ -82,6 +84,22 @@ public class NewsTopicsRequest extends RealmObject implements ITabEntity {
 
     public void setImgUrl(String imgUrl) {
         this.imgUrl = imgUrl;
+    }
+
+    public int getNewsAgeInDays() {
+        return newsAgeInDays;
+    }
+
+    public void setNewsAgeInDays(int newsAgeInDays) {
+        this.newsAgeInDays = newsAgeInDays;
+    }
+
+    public boolean isForceEverything() {
+        return forceEverything;
+    }
+
+    public void setForceEverything(boolean forceEverything) {
+        this.forceEverything = forceEverything;
     }
 
     public static class TopicIndexComparator implements Comparator<NewsTopicsRequest> {

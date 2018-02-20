@@ -23,6 +23,7 @@ android {
                 ADMOB_APP_ID    : System.getenv("ADMOB_APP_ID") ? System.getenv("ADMOB_APP_ID") : (properties['ADMOB_APP_ID'] ? properties['ADMOB_APP_ID'] : project.hasProperty("ADMOB_APP_ID")),
                 ADMOD_LIST_INSERT_ADS_UNIT_ID : System.getenv("ADMOD_LIST_INSERT_ADS_UNIT_ID") ? System.getenv("ADMOD_LIST_INSERT_ADS_UNIT_ID") : (properties['ADMOD_LIST_INSERT_ADS_UNIT_ID'] ? properties['ADMOD_LIST_INSERT_ADS_UNIT_ID'] : project.hasProperty("ADMOD_LIST_INSERT_ADS_UNIT_ID")),
                 NEWSAPI_API_KEY : System.getenv("NEWSAPI_API_KEY") ? System.getenv("NEWSAPI_API_KEY") : (properties['NEWSAPI_API_KEY'] ? properties['NEWSAPI_API_KEY'] : project.hasProperty("NEWSAPI_API_KEY")),
+                ALTER_HOST_API_KEY : System.getenv("ALTER_HOST_API_KEY") ? System.getenv("ALTER_HOST_API_KEY") : (properties['ALTER_HOST_API_KEY'] ? properties['ALTER_HOST_API_KEY'] : project.hasProperty("ALTER_HOST_API_KEY")),
         ]
     }
     signingConfigs {

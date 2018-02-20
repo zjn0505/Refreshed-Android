@@ -14,6 +14,7 @@ public class MetaUtils {
     public static final String ADMOB_APP_ID = "ADMOB_APP_ID";
     public static final String ADMOD_LIST_INSERT_ADS_UNIT_ID = "ADMOD_LIST_INSERT_ADS_UNIT_ID";
     public static final String NEWSAPI_API_KEY = "NEWSAPI_API_KEY";
+    public static final String ALTER_HOST_API_KEY = "ALTER_HOST_API_KEY";
 
 
     public static String getMeta(String key) {
