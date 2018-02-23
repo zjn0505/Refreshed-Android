@@ -241,7 +241,8 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
                     int color = resources.getColor(R.color.textColorPrimary);
                     mTvTitle.setTextColor(color);
                     mTvDescription.setTextColor(color);
-                    mTvPublishTime.setTextColor(color);
+                    int colorSecondary = resources.getColor(R.color.textColorSecondary);
+                    mTvPublishTime.setTextColor(colorSecondary);
                 }
 
                 mView.setOnClickListener(new View.OnClickListener() {

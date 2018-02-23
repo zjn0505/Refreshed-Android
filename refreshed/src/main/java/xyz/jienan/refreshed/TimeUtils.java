@@ -35,7 +35,7 @@ public class TimeUtils {
 
     public static String convertTimeToString(String utcTime) {
         Date date = convertStringToDate(utcTime);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         return sdf.format(date);
     }
 

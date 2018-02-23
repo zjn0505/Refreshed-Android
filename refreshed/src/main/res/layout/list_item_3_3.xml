@@ -63,7 +63,7 @@
             android:layout_marginRight="8dp"
             android:layout_below="@id/tv_description"
             tools:text="123123123123"
-            android:text="?attr/colorPrimary"/>
+            android:textColor="@color/textColorSecondary"/>
 
     </RelativeLayout>
 

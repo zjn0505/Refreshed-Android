@@ -5,4 +5,5 @@
     <color name="colorAccent">#FF4081</color>
     <color name="textColorItemRead">#9b9999</color>
     <color name="textColorPrimary">#202020</color>
+    <color name="textColorSecondary">#414141</color>
 </resources>
