@@ -13,7 +13,7 @@ public class WebUtils {
     public static void openLink(Context context, String url) {
         CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
         builder.setToolbarColor(context.getResources().getColor(R.color.colorPrimary));
-        CustomTabsIntent customTabsIntent = builder.build();
+        CustomTabsIntent customTabsIntent = builder.addDefaultShareMenuItem().build();
         customTabsIntent.launchUrl(context, Uri.parse(url));
     }
 }
