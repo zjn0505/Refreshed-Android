@@ -115,6 +115,7 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
         refreshLayout = stateful.findViewById(R.id.swipe_refresh_list);
         refreshLayout.setOnRefreshListener(this);
         refreshLayout.setEnabled(false);
+        refreshLayout.setColorSchemeResources(R.color.colorAccent, R.color.colorPrimary);
         rvNews = stateful.findViewById(R.id.recyclerview);
         setupRecyclerView(rvNews);
         mPresenter = new NewsListPresenter(this);
