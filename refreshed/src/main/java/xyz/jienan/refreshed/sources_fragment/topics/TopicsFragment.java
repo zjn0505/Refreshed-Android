@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import xyz.jienan.refreshed.R;
+import xyz.jienan.refreshed.base.AnalyticsManager;
 import xyz.jienan.refreshed.base.RefreshedApplication;
 import xyz.jienan.refreshed.island.NewsIslandActivity;
 import xyz.jienan.refreshed.network.entity.NewsTopicsRequest;
@@ -33,6 +34,8 @@ import xyz.jienan.refreshed.sources_fragment.BaseSourcesFragment;
 import xyz.jienan.refreshed.ui.NewsPagerAdapter;
 
 import static android.app.Activity.RESULT_OK;
+import static xyz.jienan.refreshed.base.Const.EVENT_ENTER_ISLAND;
+import static xyz.jienan.refreshed.base.Const.EVENT_SELECT_TOPICS;
 
 /**
  * Created by jienanzhang on 21/01/2018.
@@ -101,6 +104,7 @@ public class TopicsFragment extends BaseSourcesFragment implements TopicsContrac
                 Intent intent = new Intent(getActivity(), NewsIslandActivity.class);
                 intent.putExtra("source", query);
                 startActivityForResult(intent, REQ_ISLAND_ACTIVITY);
+                AnalyticsManager.getInstance().logEvent(EVENT_ENTER_ISLAND);
                 search.collapseActionView();
                 return true;
             }
@@ -123,6 +127,7 @@ public class TopicsFragment extends BaseSourcesFragment implements TopicsContrac
                 Intent intent = new Intent(getActivity(), SourcesSelectActivity.class);
                 intent.putExtra("type", R.integer.type_topic);
                 startActivityForResult(intent, 1);
+                AnalyticsManager.getInstance().logEvent(EVENT_SELECT_TOPICS);
                 break;
 
         }

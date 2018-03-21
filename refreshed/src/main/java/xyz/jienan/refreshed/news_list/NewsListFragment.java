@@ -31,6 +31,7 @@ import xyz.jienan.refreshed.R;
 import xyz.jienan.refreshed.TimeUtils;
 import xyz.jienan.refreshed.WebUtils;
 import xyz.jienan.refreshed.base.AdsManager;
+import xyz.jienan.refreshed.base.AnalyticsManager;
 import xyz.jienan.refreshed.base.RefreshedApplication;
 import xyz.jienan.refreshed.network.entity.ArticleBean;
 import xyz.jienan.refreshed.network.entity.ArticlesBean;
@@ -38,6 +39,9 @@ import xyz.jienan.refreshed.ui.FaceCenterCrop;
 
 import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
 import static xyz.jienan.refreshed.MetaUtils.ADMOD_LIST_INSERT_ADS_UNIT_ID;
+import static xyz.jienan.refreshed.base.Const.EVENT_LIST_EMPTY;
+import static xyz.jienan.refreshed.base.Const.EVENT_LIST_ERROR;
+import static xyz.jienan.refreshed.base.Const.EVENT_LIST_RELOAD;
 import static xyz.jienan.refreshed.network.NetworkService.BYPASS_CACHE;
 import static xyz.jienan.refreshed.network.NetworkService.USE_CACHE;
 
@@ -172,6 +176,7 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
                 mAdapter.updateList(articles);
             } else {
                 stateful.showEmpty();
+                AnalyticsManager.getInstance().logEvent(EVENT_LIST_EMPTY);
             }
         } else {
             stateful.showError(new View.OnClickListener() {
@@ -179,8 +184,10 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
                 public void onClick(View v) {
                     mPresenter.loadList(newsSource, type, newsDays, BYPASS_CACHE);
                     stateful.showLoading();
+                    AnalyticsManager.getInstance().logEvent(EVENT_LIST_RELOAD);
                 }
             });
+            AnalyticsManager.getInstance().logEvent(EVENT_LIST_ERROR);
         }
 
     }

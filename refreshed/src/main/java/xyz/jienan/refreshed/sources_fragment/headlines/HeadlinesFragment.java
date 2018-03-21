@@ -15,6 +15,7 @@ import com.gturedi.views.StatefulLayout;
 import java.util.List;
 
 import xyz.jienan.refreshed.R;
+import xyz.jienan.refreshed.base.AnalyticsManager;
 import xyz.jienan.refreshed.base.RefreshedApplication;
 import xyz.jienan.refreshed.network.entity.NewsSourceBean;
 import xyz.jienan.refreshed.source_select.SourcesSelectActivity;
@@ -22,6 +23,7 @@ import xyz.jienan.refreshed.sources_fragment.BaseSourcesFragment;
 import xyz.jienan.refreshed.ui.NewsPagerAdapter;
 
 import static android.app.Activity.RESULT_OK;
+import static xyz.jienan.refreshed.base.Const.EVENT_SELECT_SOURCES;
 
 /**
  * Created by jienanzhang on 17/07/2017.
@@ -89,6 +91,7 @@ public class HeadlinesFragment extends BaseSourcesFragment implements HeadlinesC
                 Intent intent = new Intent(getActivity(), SourcesSelectActivity.class);
                 intent.putExtra("type", R.integer.type_source);
                 startActivityForResult(intent, 1);
+                AnalyticsManager.getInstance().logEvent(EVENT_SELECT_SOURCES);
             }
         }
         return true;
