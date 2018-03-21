@@ -58,7 +58,8 @@ public class HeadlinesFragment extends BaseSourcesFragment implements HeadlinesC
         } else {
             viewPager.setCurrentItem(0);
         }
-        ((RefreshedApplication) getActivity().getApplication()).bus().send(sourceList);
+        if (getActivity() != null)
+            ((RefreshedApplication) getActivity().getApplication()).bus().send(sourceList);
     }
 
     @Override
