@@ -25,7 +25,9 @@
 # OkHttp3
 -dontwarn okhttp3.logging.**
 -keep class okhttp3.internal.**{*;}
+-dontwarn org.conscrypt.**
 -dontwarn okio.**
+-dontwarn okhttp3.**
 # Retrofit
 -dontwarn retrofit2.**
 -keep class retrofit2.** { *; }
@@ -71,6 +73,7 @@
 -dontnote android.net.http.*
 -dontnote org.apache.commons.codec.**
 -dontnote org.apache.http.**
+-dontnote io.reactivex.Observable
 
 # Crashlytics
 -keepattributes *Annotation*
