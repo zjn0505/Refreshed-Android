@@ -1,6 +1,8 @@
 package xyz.jienan.refreshed.base;
 
 import android.app.Application;
+import android.support.multidex.MultiDex;
+import android.support.multidex.MultiDexApplication;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -12,7 +14,7 @@ import io.realm.RealmConfiguration;
  * Created by jienanzhang on 11/01/2018.
  */
 
-public class RefreshedApplication extends Application {
+public class RefreshedApplication extends MultiDexApplication {
 
     private static RefreshedApplication mInstance;
     public static boolean isGoogleServiceAvaliable = false;
@@ -24,6 +26,7 @@ public class RefreshedApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        MultiDex.install(this);
         mInstance = this;
         isGoogleServiceAvaliable = isGooglePlayServicesAvailable();
         Realm.init(this);

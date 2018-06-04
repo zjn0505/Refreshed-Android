@@ -41,7 +41,6 @@ import com.google.android.gms.ads.MobileAds;
 
 import java.util.List;
 
-import io.reactivex.functions.Consumer;
 import xyz.jienan.refreshed.base.RefreshedApplication;
 import xyz.jienan.refreshed.network.entity.ITabEntity;
 import xyz.jienan.refreshed.network.entity.NewsSourceBean;
@@ -72,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         final ActionBar ab = getSupportActionBar();
@@ -80,8 +79,8 @@ public class MainActivity extends AppCompatActivity {
         ab.setDisplayHomeAsUpEnabled(true);
         MobileAds.initialize(this, MetaUtils.getMeta(ADMOB_APP_ID));
         GlideFaceDetector.initialize(this);
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        navigationView = (NavigationView) findViewById(R.id.nav_view);
+        mDrawerLayout = findViewById(R.id.drawer_layout);
+        navigationView = findViewById(R.id.nav_view);
         mDrawerScroller = findViewById(R.id.drawer_scroller);
         rvHeadlines = findViewById(R.id.rv_headlines);
         rvTopics = findViewById(R.id.rv_topics);
@@ -102,60 +101,47 @@ public class MainActivity extends AppCompatActivity {
             setupDrawerContent(navigationView);
         }
 
-        if (headlinesFragment == null) {
-            headlinesFragment = new HeadlinesFragment();
+        if (savedInstanceState == null) {
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            TopicsFragment topicsFragment = new TopicsFragment();
+            fragmentTransaction.add(R.id.container, topicsFragment, "topics")
+                    .hide(topicsFragment)
+                    .add(R.id.container, new HeadlinesFragment(), "headlines")
+                    .commit();
         }
-        if (topicsFragment == null) {
-            topicsFragment = new TopicsFragment();
-        }
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.add(R.id.container, topicsFragment,"topics");
-        transaction.add(R.id.container, headlinesFragment,"headlines");
-        transaction.hide(topicsFragment);
 
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+        TabLayout tabLayout = findViewById(R.id.tabs);
         tabLayout.setVisibility(View.GONE);
 
-        transaction.commit();
         setTitle("Headlines");
         ((RefreshedApplication) getApplication()).bus().toObservable()
-                .subscribe(new Consumer<Object>() {
-
-                    @Override
-                    public void accept(Object o) throws Exception {
-                        if (o instanceof List) {
-                            if(((List)o).size()>0){
-                                if (((List)o).get(0) instanceof ITabEntity) {
-                                    updateDrawer((List<ITabEntity>) o);
-                                }
+                .subscribe(o -> {
+                    if (o instanceof List) {
+                        if(((List)o).size()>0){
+                            if (((List)o).get(0) instanceof ITabEntity) {
+                                updateDrawer((List<ITabEntity>) o);
                             }
                         }
                     }
                 });
-        mDrawerScroller.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                Log.d("Touch", "onTouch: scroller " + event.getAction());
-                if (event.getAction() == MotionEvent.ACTION_MOVE || event.getAction() == MotionEvent.ACTION_DOWN) {
-                    blockTouch = true;
-                } else if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
-                    blockTouch = false;
-                }
-                return false;
+        mDrawerScroller.setOnTouchListener((v, event) -> {
+            Log.d("Touch", "onTouch: scroller " + event.getAction());
+            if (event.getAction() == MotionEvent.ACTION_MOVE || event.getAction() == MotionEvent.ACTION_DOWN) {
+                blockTouch = true;
+            } else if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
+                blockTouch = false;
             }
+            return false;
         });
-        mDrawerLayout.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                Log.d("Touch", "onTouch: drawer " + event.getAction());
+        mDrawerLayout.setOnTouchListener((v, event) -> {
+            Log.d("Touch", "onTouch: drawer " + event.getAction());
 //                if (blockTouch)
-                if (blockTouch && event.getAction() == MotionEvent.ACTION_MOVE) {
-                    Log.d("Touch", "onTouch: drawer blocked");
-                } else if (!blockTouch && event.getAction() == MotionEvent.ACTION_MOVE) {
-                    Log.d("Touch", "onTouch: drawer not blocked");
-                }
-                return blockTouch;
+            if (blockTouch && event.getAction() == MotionEvent.ACTION_MOVE) {
+                Log.d("Touch", "onTouch: drawer blocked");
+            } else if (!blockTouch && event.getAction() == MotionEvent.ACTION_MOVE) {
+                Log.d("Touch", "onTouch: drawer not blocked");
             }
+            return blockTouch;
         });
     }
 
@@ -196,10 +182,6 @@ public class MainActivity extends AppCompatActivity {
         tvTopics.setOnClickListener(drawerItemClickListener);
     }
 
-
-    private HeadlinesFragment headlinesFragment;
-    private TopicsFragment topicsFragment;
-
     private class DrawerMainItemClickListener implements View.OnClickListener {
 
         @Override
@@ -216,10 +198,18 @@ public class MainActivity extends AppCompatActivity {
         public void onDrawerItemClicked(int type, String sourceName) {
             if (type == DrawerAdapter.TYPE_HEADLINES) {
                 switchFragment(R.id.tv_headlines);
-                headlinesFragment.switchToSource(sourceName);
+                HeadlinesFragment fragment = ((HeadlinesFragment) fragmentManager.findFragmentByTag("headlines"));
+                if (fragment == null) {
+                    fragment = new HeadlinesFragment();
+                }
+                fragment.switchToSource(sourceName);
             } else if (type == DrawerAdapter.TYPE_TOPICS) {
                 switchFragment(R.id.tv_topics);
-                topicsFragment.switchToSource(sourceName);
+                TopicsFragment fragment = ((TopicsFragment) fragmentManager.findFragmentByTag("topics"));
+                if (fragment == null) {
+                    fragment = new TopicsFragment();
+                }
+                fragment.switchToSource(sourceName);
             }
         }
     }
@@ -228,17 +218,36 @@ public class MainActivity extends AppCompatActivity {
         Fragment toShow = null;
         Fragment toHide = null;
         String title = "";
+        String tag = "";
         if (id == R.id.tv_headlines) {
             toShow = fragmentManager.findFragmentByTag("headlines");
+            if (toShow == null) {
+                toShow = new HeadlinesFragment();
+            }
             toHide = fragmentManager.findFragmentByTag("topics");
             title = "Headlines";
+            tag = "headlines";
         } else if (id == R.id.tv_topics) {
             toShow = fragmentManager.findFragmentByTag("topics");
-            toHide = fragmentManager.findFragmentByTag("headlines");
             title = "Topics";
+            if (toShow == null) {
+                toShow = new TopicsFragment();
+            }
+            toHide = fragmentManager.findFragmentByTag("headlines");
+            tag = "topics";
         }
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.hide(toHide).show(toShow).commit();
+        if (toHide != null) {
+            transaction.hide(toHide);
+        }
+        if (toShow != null) {
+            if (toShow.isAdded()) {
+                transaction.show(toShow);
+            } else {
+                transaction.add(R.id.container, toShow, tag);
+            }
+        }
+        transaction.commit();
         mDrawerLayout.closeDrawers();
         setTitle(title);
     }
