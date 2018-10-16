@@ -262,10 +262,10 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
                 } else {
                     mIvThumbnail.setVisibility(View.VISIBLE);
                     RequestOptions myOptions = new RequestOptions()
-                            .placeholder(R.drawable.image_placeholder);
+                            .placeholder(R.drawable.image_placeholder)
+                            .transforms(isGoogleServiceAvailable ?
+                                    new FaceCenterCrop() : new CenterCrop());
 
-                    if (isGoogleServiceAvailable)
-                        myOptions.transforms(new CenterCrop(), new FaceCenterCrop());
 
                     Glide.with(mIvThumbnail.getContext())
                             .load(article.getUrlToImage())

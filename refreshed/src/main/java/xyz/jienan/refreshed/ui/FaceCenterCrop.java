@@ -1,27 +1,22 @@
 package xyz.jienan.refreshed.ui;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import android.util.SparseArray;
 
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
-import com.google.android.gms.tasks.Task;
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
 import com.google.firebase.ml.vision.common.FirebaseVisionImage;
-import com.google.firebase.ml.vision.face.FirebaseVisionFace;
 import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetector;
 
 import java.security.MessageDigest;
-import java.util.List;
 
 import timber.log.Timber;
 
@@ -47,18 +42,6 @@ public class FaceCenterCrop extends BitmapTransformation {
     private static final String ID = "xyz.jienan.refreshed.ui.FaceCenterCrop." + VERSION;
     private static final byte[] ID_BYTES = ID.getBytes(CHARSET);
 
-    public FaceCenterCrop() {
-        // Intentionally empty.
-    }
-
-    /**
-     * @deprecated Use
-     */
-    @Deprecated
-    public FaceCenterCrop(Context context){
-        this();
-    }
-
     /**
      * @param bitmapPool A {@link com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool} that can be used to obtain and
      *                   return intermediate {@link Bitmap}s used in this transformation. For every
@@ -74,9 +57,7 @@ public class FaceCenterCrop extends BitmapTransformation {
 
         float scaleX = (float) width / original.getWidth();
         float scaleY = (float) height / original.getHeight();
-        Timber.e("zjn " + " scale X " + scaleX + " scale Y " + scaleY);
-        if (scaleX == scaleY) {
-            Timber.e("zjn face detect");
+        if (scaleX != scaleY) {
             Bitmap.Config config =
                     original.getConfig() != null ? original.getConfig() : Bitmap.Config.ARGB_8888;
             Bitmap result = bitmapPool.get(width, height, config);
@@ -90,8 +71,8 @@ public class FaceCenterCrop extends BitmapTransformation {
 
             PointF focusPoint = new PointF();
 
-//            detectFace(original, focusPoint);
-            detectFaceML(original, focusPoint);
+            detectFace(original, focusPoint);
+//            detectFaceML(original, focusPoint);
 
             if (scaleX < scaleY) {
 
@@ -125,6 +106,7 @@ public class FaceCenterCrop extends BitmapTransformation {
      * @param centerOfAllFaces To store the center point.
      */
     private void detectFace(Bitmap bitmap, PointF centerOfAllFaces) {
+        final long time = System.currentTimeMillis();
         FaceDetector faceDetector = GlideFaceDetector.getFaceDetector();
         if (!faceDetector.isOperational()) {
             centerOfAllFaces.set(bitmap.getWidth() / 2, bitmap.getHeight() / 2); // center crop
@@ -143,6 +125,11 @@ public class FaceCenterCrop extends BitmapTransformation {
                 sumY = sumY + faceCenter.y;
             }
             centerOfAllFaces.set(sumX / totalFaces, sumY / totalFaces);
+            Timber.e("Face detected %d center moved : x %f, y %f" ,
+                    totalFaces,
+                    sumX / totalFaces - bitmap.getWidth() / 2,
+                    sumY / totalFaces - bitmap.getHeight() / 2);
+            Timber.e("Take time " + (System.currentTimeMillis() - time));
             return;
         }
         centerOfAllFaces.set(bitmap.getWidth() / 2, bitmap.getHeight() / 2); // center crop
@@ -155,27 +142,35 @@ public class FaceCenterCrop extends BitmapTransformation {
      * @param centerOfAllFaces To store the center point.
      */
     private void detectFaceML(Bitmap bitmap, PointF centerOfAllFaces) {
+        final long time = System.currentTimeMillis();
         FirebaseVisionFaceDetector faceDetector = GlideFaceDetectorML.getFaceDetector();
         FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(bitmap);
-        Task<List<FirebaseVisionFace>> result =
-                faceDetector.detectInImage(image)
-                        .addOnSuccessListener(
-                                faces -> {
-                                    final int totalFaces = faces.size();
-                                    if (totalFaces > 0) {
-                                        float sumX = 0f;
-                                        float sumY = 0f;
-                                        for (int i = 0; i < totalFaces; i++) {
-                                            Rect faceRect = faces.get(i).getBoundingBox();
-                                            sumX = sumX + faceRect.centerX();
-                                            sumY = sumY + faceRect.centerY();
-                                        }
-                                        centerOfAllFaces.set(sumX / totalFaces, sumY / totalFaces);
-                                    }
+        faceDetector.detectInImage(image)
+                .addOnSuccessListener(
+                        faces -> {
+                            final int totalFaces = faces.size();
+                            if (totalFaces > 0) {
+                                float sumX = 0f;
+                                float sumY = 0f;
+                                for (int i = 0; i < totalFaces; i++) {
+                                    Rect faceRect = faces.get(i).getBoundingBox();
+                                    sumX = sumX + faceRect.centerX();
+                                    sumY = sumY + faceRect.centerY();
+                                }
+                                centerOfAllFaces.set(sumX / totalFaces, sumY / totalFaces);
 
-                                })
-                        .addOnFailureListener(
-                                e -> Log.e("FaceCenterCrop", "Failed to detect face " + e.getMessage()));
+                                Timber.e("Face detected %d, center moved : x %f, y %f" ,
+                                        totalFaces,
+                                        sumX / totalFaces - bitmap.getWidth() / 2,
+                                        sumY / totalFaces - bitmap.getHeight() / 2);
+                                Timber.e("Take time " + (System.currentTimeMillis() - time));
+                            }
+
+                        })
+                .addOnFailureListener(e -> {
+                    Timber.e(e, "Failed to detect face");
+                    centerOfAllFaces.set(bitmap.getWidth() / 2, bitmap.getHeight() / 2);
+                });
     }
 
     /**
