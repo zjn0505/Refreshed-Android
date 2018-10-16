@@ -4,17 +4,29 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.PointF;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.util.SparseArray;
 
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
+import com.google.firebase.ml.vision.common.FirebaseVisionImage;
+import com.google.firebase.ml.vision.face.FirebaseVisionFace;
+import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetector;
 
 import java.security.MessageDigest;
+import java.util.List;
+import java.util.Timer;
+
+import timber.log.Timber;
 
 /*
  * Copyright (C) 2016 Rohit Arya
@@ -35,7 +47,7 @@ import java.security.MessageDigest;
  */
 public class FaceCenterCrop extends BitmapTransformation {
     private static final int VERSION = 1;
-    private static final String ID = "com.rohitarya.glide.facedetection.transformation.FaceCenterCrop." + VERSION;
+    private static final String ID = "xyz.jienan.refreshed.ui.FaceCenterCrop." + VERSION;
     private static final byte[] ID_BYTES = ID.getBytes(CHARSET);
 
     public FaceCenterCrop() {
@@ -65,9 +77,9 @@ public class FaceCenterCrop extends BitmapTransformation {
 
         float scaleX = (float) width / original.getWidth();
         float scaleY = (float) height / original.getHeight();
-
-        if (scaleX != scaleY) {
-
+        Timber.e("zjn " + " scale X " + scaleX + " scale Y " + scaleY);
+        if (scaleX == scaleY) {
+            Timber.e("zjn face detect");
             Bitmap.Config config =
                     original.getConfig() != null ? original.getConfig() : Bitmap.Config.ARGB_8888;
             Bitmap result = bitmapPool.get(width, height, config);
@@ -81,7 +93,8 @@ public class FaceCenterCrop extends BitmapTransformation {
 
             PointF focusPoint = new PointF();
 
-            detectFace(original, focusPoint);
+//            detectFace(original, focusPoint);
+            detectFaceML(original, focusPoint);
 
             if (scaleX < scaleY) {
 
@@ -136,6 +149,36 @@ public class FaceCenterCrop extends BitmapTransformation {
             return;
         }
         centerOfAllFaces.set(bitmap.getWidth() / 2, bitmap.getHeight() / 2); // center crop
+    }
+
+    /**
+     * Calculates a point (focus point) in the bitmap, around which cropping needs to be performed.
+     *
+     * @param bitmap           Bitmap in which faces are to be detected.
+     * @param centerOfAllFaces To store the center point.
+     */
+    private void detectFaceML(Bitmap bitmap, PointF centerOfAllFaces) {
+        FirebaseVisionFaceDetector faceDetector = GlideFaceDetectorML.getFaceDetector();
+        FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(bitmap);
+        Task<List<FirebaseVisionFace>> result =
+                faceDetector.detectInImage(image)
+                        .addOnSuccessListener(
+                                faces -> {
+                                    final int totalFaces = faces.size();
+                                    if (totalFaces > 0) {
+                                        float sumX = 0f;
+                                        float sumY = 0f;
+                                        for (int i = 0; i < totalFaces; i++) {
+                                            Rect faceRect = faces.get(i).getBoundingBox();
+                                            sumX = sumX + faceRect.centerX();
+                                            sumY = sumY + faceRect.centerY();
+                                        }
+                                        centerOfAllFaces.set(sumX / totalFaces, sumY / totalFaces);
+                                    }
+
+                                })
+                        .addOnFailureListener(
+                                e -> Log.e("FaceCenterCrop", "Failed to detect face " + e.getMessage()));
     }
 
     /**

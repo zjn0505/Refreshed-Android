@@ -36,8 +36,7 @@ public class NewsListPresenter implements NewsListContract.Presenter {
     private NewsListContract.View mView;
     private IDBManager dbManger;
 
-
-    public NewsListPresenter(NewsListContract.View  view) {
+    NewsListPresenter(NewsListContract.View view) {
         mView = view;
         dbManger = new RealmManager();
     }
@@ -90,51 +89,48 @@ public class NewsListPresenter implements NewsListContract.Presenter {
             Observable<ArticlesBean> articlesObservable =
                     topicsRequest.isForceEverything() ? finalAlterObservable : newsAPI.getTopics(query, category, bypassCache);
             articlesObservable.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
-                    .filter(new Predicate<ArticlesBean>() {
-                        @Override
-                        public boolean test(ArticlesBean articlesBean) throws Exception {
-                            final NewsTopicsRequest finalTopicsRequest = dbManger.getTopicsRequest(newsSource);
-                            int articlesCount = articlesBean.getArticles().size();
-                            if (articlesCount == 0) {
+                    .filter(articlesBean -> {
+                        final NewsTopicsRequest finalTopicsRequest = dbManger.getTopicsRequest(newsSource);
+                        int articlesCount = articlesBean.getArticles().size();
+                        if (articlesCount == 0) {
+                            if (dbManger.getTopicsRequest(newsSource) != null)
+                                dbManger.setForceEverything(newsSource);
+                        } else {
+                            if (finalTopicsRequest.isForceEverything()) {
+                                int totalArticles = articlesBean.getTotalResults();
+                                final int newsDays1 = finalTopicsRequest.getNewsAgeInDays();
                                 if (dbManger.getTopicsRequest(newsSource) != null)
-                                    dbManger.setForceEverything(newsSource);
-                            } else {
-                                if (finalTopicsRequest.isForceEverything()) {
-                                    int totalArticles = articlesBean.getTotalResults();
-                                    final int newsDays = finalTopicsRequest.getNewsAgeInDays();
-                                    if (dbManger.getTopicsRequest(newsSource) != null)
-                                        if (totalArticles > 800 && newsDays > 3) {
-                                            dbManger.adjustTopicsDays(newsSource, newsDays - 10 > 0 ? (newsDays - 10) : (newsDays - 3));
-                                        } else if (totalArticles < 20) {
-                                            dbManger.adjustTopicsDays(newsSource, newsDays+10);
-                                        } else {
-                                            Observable<ResponseBody> observable = newsAPI.updateTopicNewsDays(REQ_UPDATE_TOPICS, newsSource, newsDays, MetaUtils.getMeta(ALTER_HOST_API_KEY));
-                                            observable.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Observer<ResponseBody>() {
-                                                @Override
-                                                public void onSubscribe(Disposable d) {
+                                    if (totalArticles > 800 && newsDays1 > 3) {
+                                        dbManger.adjustTopicsDays(newsSource, newsDays1 - 10 > 0 ? (newsDays1 - 10) : (newsDays1 - 3));
+                                    } else if (totalArticles < 20) {
+                                        dbManger.adjustTopicsDays(newsSource, newsDays1 +10);
+                                    } else {
+                                        Observable<ResponseBody> observable = newsAPI.updateTopicNewsDays(REQ_UPDATE_TOPICS, newsSource, newsDays1, MetaUtils.getMeta(ALTER_HOST_API_KEY));
+                                        observable.subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Observer<ResponseBody>() {
+                                            @Override
+                                            public void onSubscribe(Disposable d) {
 
-                                                }
+                                            }
 
-                                                @Override
-                                                public void onNext(ResponseBody responseBody) {
-                                                    Log.d("zjn", "onNext: " + responseBody);
-                                                }
+                                            @Override
+                                            public void onNext(ResponseBody responseBody) {
+                                                Log.d("zjn", "onNext: " + responseBody);
+                                            }
 
-                                                @Override
-                                                public void onError(Throwable e) {
-                                                    Log.e("zjn", "onError: " +  e);
-                                                }
+                                            @Override
+                                            public void onError(Throwable e) {
+                                                Log.e("zjn", "onError: " +  e);
+                                            }
 
-                                                @Override
-                                                public void onComplete() {
+                                            @Override
+                                            public void onComplete() {
 
-                                                }
-                                            });
-                                        }
-                                }
+                                            }
+                                        });
+                                    }
                             }
-                            return true;
                         }
+                        return true;
                     }).observeOn(Schedulers.io()).flatMap(new Function<ArticlesBean, ObservableSource<ArticlesBean>>() {
                 @Override
                 public ObservableSource<ArticlesBean> apply(ArticlesBean articlesBean) throws Exception {

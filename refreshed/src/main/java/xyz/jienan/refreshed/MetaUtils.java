@@ -21,10 +21,14 @@ public class MetaUtils {
         String packageName = RefreshedApplication.getInstance().getPackageName();
         String result = "";
         try {
-            ApplicationInfo appInfo = RefreshedApplication.getInstance().getPackageManager().getApplicationInfo(packageName, PackageManager.GET_META_DATA);
+            ApplicationInfo appInfo = RefreshedApplication.getInstance()
+                    .getPackageManager()
+                    .getApplicationInfo(packageName, PackageManager.GET_META_DATA);
+
             if (appInfo.metaData != null) {
                 result = appInfo.metaData.getString(key);
             }
+
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }

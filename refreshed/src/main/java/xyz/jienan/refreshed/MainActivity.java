@@ -41,6 +41,7 @@ import com.google.android.gms.ads.MobileAds;
 
 import java.util.List;
 
+import xyz.jienan.refreshed.base.AdsManager;
 import xyz.jienan.refreshed.base.RefreshedApplication;
 import xyz.jienan.refreshed.network.entity.ITabEntity;
 import xyz.jienan.refreshed.network.entity.NewsSourceBean;
@@ -75,9 +76,11 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         final ActionBar ab = getSupportActionBar();
-        ab.setHomeAsUpIndicator(R.drawable.ic_menu);
-        ab.setDisplayHomeAsUpEnabled(true);
-        MobileAds.initialize(this, MetaUtils.getMeta(ADMOB_APP_ID));
+        if (ab != null) {
+            ab.setHomeAsUpIndicator(R.drawable.ic_menu);
+            ab.setDisplayHomeAsUpEnabled(true);
+        }
+        MobileAds.initialize(this, AdsManager.getAdsAppId());
         GlideFaceDetector.initialize(this);
         mDrawerLayout = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.nav_view);

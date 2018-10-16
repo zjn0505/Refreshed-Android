@@ -41,7 +41,7 @@
 # Gson
 -keep class com.google.gson.stream.** { *; }
 -keepattributes EnclosingMethod
--keep class xyz.jienan.refreshed.network.**{*;}
+-keep class xyz.jienan.refreshed.network.entity.**{*;}
 
 -dontwarn sun.misc.**
 

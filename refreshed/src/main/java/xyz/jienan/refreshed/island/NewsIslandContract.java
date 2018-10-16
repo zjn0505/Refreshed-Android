@@ -5,11 +5,16 @@ package xyz.jienan.refreshed.island;
  */
 
 public class NewsIslandContract {
+
     interface View {
+
         void onNewsDaysReady(int days);
     }
+
     interface Presenter {
+
         boolean ifTopicsExist(String topics);
+
         boolean addTopics(String topics);
 
         void checkNewsDays(String source);

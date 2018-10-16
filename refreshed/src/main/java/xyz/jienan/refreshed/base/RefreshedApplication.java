@@ -9,6 +9,8 @@ import com.google.android.gms.common.GoogleApiAvailability;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
+import timber.log.Timber;
+import xyz.jienan.refreshed.BuildConfig;
 
 /**
  * Created by jienanzhang on 11/01/2018.
@@ -17,7 +19,7 @@ import io.realm.RealmConfiguration;
 public class RefreshedApplication extends MultiDexApplication {
 
     private static RefreshedApplication mInstance;
-    public static boolean isGoogleServiceAvaliable = false;
+    public static boolean isGoogleServiceAvailable = false;
     public static RefreshedApplication getInstance() {
         return mInstance;
     }
@@ -28,7 +30,10 @@ public class RefreshedApplication extends MultiDexApplication {
         super.onCreate();
         MultiDex.install(this);
         mInstance = this;
-        isGoogleServiceAvaliable = isGooglePlayServicesAvailable();
+        isGoogleServiceAvailable = isGooglePlayServicesAvailable();
+        if (BuildConfig.DEBUG) {
+            Timber.plant(new Timber.DebugTree());
+        }
         Realm.init(this);
         RealmConfiguration config = new RealmConfiguration.Builder()
                 .name("news.realm")

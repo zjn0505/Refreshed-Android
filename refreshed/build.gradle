@@ -47,11 +47,17 @@ android {
     buildTypes {
         debug {
             zipAlignEnabled true
-            applicationIdSuffix ".debug"
+//            applicationIdSuffix ".debug"
+            minifyEnabled true
+            zipAlignEnabled true
+            shrinkResources true
+            useProguard false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
         release {
             minifyEnabled true
             zipAlignEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.releaseConfig
         }
@@ -110,11 +116,13 @@ dependencies {
     implementation 'io.reactivex.rxjava2:rxjava:2.1.12'
     implementation 'io.reactivex.rxjava2:rxandroid:2.0.2'
     implementation 'com.github.gturedi:stateful-layout:1.2.1'
-    implementation 'com.google.firebase:firebase-core:16.0.0'
-    implementation 'com.google.firebase:firebase-ads:15.0.1'
+    implementation 'com.google.firebase:firebase-core:16.0.4'
+    implementation 'com.google.firebase:firebase-ads:17.0.0'
+    implementation 'com.google.firebase:firebase-ml-vision:17.0.1'
     implementation 'com.google.android.gms:play-services-vision:' + rootProject.googleLibVersion
     implementation 'com.crashlytics.sdk.android:crashlytics:2.9.3'
     implementation 'com.android.support:multidex:1.0.3'
+    implementation 'com.jakewharton.timber:timber:4.7.1'
 
 }
 
