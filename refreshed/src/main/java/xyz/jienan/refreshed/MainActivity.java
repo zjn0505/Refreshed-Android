@@ -52,8 +52,6 @@ import xyz.jienan.refreshed.ui.DrawerAdapter;
 import xyz.jienan.refreshed.ui.DrawerAdapter.IDrawerItemClickListener;
 import xyz.jienan.refreshed.ui.GlideFaceDetector;
 
-import static xyz.jienan.refreshed.MetaUtils.ADMOB_APP_ID;
-
 public class MainActivity extends AppCompatActivity {
 
     private DrawerLayout mDrawerLayout;

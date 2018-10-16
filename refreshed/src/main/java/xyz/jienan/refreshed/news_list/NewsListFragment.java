@@ -169,7 +169,7 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
     public void renderList(ArticlesBean articlesBean) {
         if (articlesBean != null) {
             List<ArticleBean> articles = articlesBean.getArticles();
-            if (articles != null && articles.size() > 0) {
+            if (articles != null && !articles.isEmpty()) {
                 stateful.showContent();
                 refreshLayout.setEnabled(true);
                 refreshLayout.setRefreshing(false);

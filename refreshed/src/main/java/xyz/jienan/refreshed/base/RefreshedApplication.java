@@ -1,6 +1,5 @@
 package xyz.jienan.refreshed.base;
 
-import android.app.Application;
 import android.support.multidex.MultiDex;
 import android.support.multidex.MultiDexApplication;
 

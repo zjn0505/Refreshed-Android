@@ -7,11 +7,9 @@ import android.util.Log;
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
 import io.reactivex.Observer;
-import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Function;
-import io.reactivex.functions.Predicate;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.ResponseBody;
 import xyz.jienan.refreshed.MetaUtils;
@@ -25,7 +23,6 @@ import xyz.jienan.refreshed.network.entity.NewsTopicsRequest;
 
 import static xyz.jienan.refreshed.MetaUtils.ALTER_HOST_API_KEY;
 import static xyz.jienan.refreshed.network.NetworkService.REQ_UPDATE_TOPICS;
-import static xyz.jienan.refreshed.network.NetworkService.USE_CACHE;
 
 /**
  * Created by jienanzhang on 11/01/2018.

@@ -1,11 +1,7 @@
 package xyz.jienan.refreshed.ui;
 
-import android.content.Context;
-
-import com.google.android.gms.vision.face.FaceDetector;
 import com.google.firebase.ml.vision.FirebaseVision;
 import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetector;
-import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetectorOptions;
 
 /*
  * Copyright (C) 2016 Rohit Arya
@@ -23,7 +19,7 @@ import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetectorOptions;
  * limitations under the License.
  */
 
-public class GlideFaceDetectorML {
+class GlideFaceDetectorML {
 
     private static volatile FirebaseVisionFaceDetector faceDetector;
 

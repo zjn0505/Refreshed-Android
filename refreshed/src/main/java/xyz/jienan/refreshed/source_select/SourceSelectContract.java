@@ -3,7 +3,6 @@ package xyz.jienan.refreshed.source_select;
 import java.util.List;
 
 import xyz.jienan.refreshed.network.entity.ITabEntity;
-import xyz.jienan.refreshed.network.entity.NewsSourceBean;
 
 /**
  * Created by jienanzhang on 11/01/2018.

@@ -2,7 +2,6 @@ package xyz.jienan.refreshed.source_select;
 
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.view.HapticFeedbackConstants;
 
 /**
  * Created by Jienan on 2017/10/13.

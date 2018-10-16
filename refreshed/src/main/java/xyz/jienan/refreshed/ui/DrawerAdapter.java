@@ -59,12 +59,9 @@ public class DrawerAdapter extends RecyclerView.Adapter {
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
         final String sourceName = mList.get(position).getName();
         ((TextView)holder.itemView).setText(sourceName);
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mListener != null)
-                    mListener.onDrawerItemClicked(mType, sourceName);
-            }
+        holder.itemView.setOnClickListener(v -> {
+            if (mListener != null)
+                mListener.onDrawerItemClicked(mType, sourceName);
         });
     }
 

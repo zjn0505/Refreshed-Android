@@ -69,12 +69,9 @@ public class HeadlinesFragment extends BaseSourcesFragment implements HeadlinesC
             tabLayout.setVisibility(View.VISIBLE);
             addSourcesToAdapter(sourceList);
         } else {
-            stateful.showError(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mPresenter.loadSources();
-                    stateful.showLoading();
-                }
+            stateful.showError(v -> {
+                mPresenter.loadSources();
+                stateful.showLoading();
             });
         }
     }

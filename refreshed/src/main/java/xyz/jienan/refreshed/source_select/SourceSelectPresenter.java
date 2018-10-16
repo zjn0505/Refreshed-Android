@@ -7,15 +7,12 @@ import java.util.HashMap;
 import java.util.List;
 
 import io.reactivex.Observable;
-import io.reactivex.ObservableSource;
-import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.BiFunction;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
+import timber.log.Timber;
 import xyz.jienan.refreshed.R;
 import xyz.jienan.refreshed.base.IDBManager;
 import xyz.jienan.refreshed.base.RealmManager;
@@ -37,7 +34,7 @@ public class SourceSelectPresenter implements SourceSelectContract.Presenter {
     private SourceSelectContract.View mView;
     private IDBManager dbManger;
 
-    public SourceSelectPresenter(SourceSelectContract.View view) {
+    SourceSelectPresenter(SourceSelectContract.View view) {
         mView = view;
         dbManger = new RealmManager();
     }
@@ -45,131 +42,87 @@ public class SourceSelectPresenter implements SourceSelectContract.Presenter {
     @Override
     public void loadSources() {
         Observable<NewsSourcesBean> sourcesObservable = NetworkService.getNewsAPI().getSources("", "");
-        sourcesObservable.flatMap(new Function<NewsSourcesBean, Observable<IconsBean>>() {
+        sourcesObservable.flatMap((Function<NewsSourcesBean, Observable<IconsBean>>) newsSourcesBean -> {
 
-            @Override
-            public Observable<IconsBean> apply(NewsSourcesBean newsSourcesBean) throws Exception {
-
-                JSONArray param = new JSONArray();
-                for (NewsSourceBean source : newsSourcesBean.getSources()) {
-                    JSONObject jsonObject = new JSONObject();
-                    jsonObject.put("type", "source");
-                    jsonObject.put("query", source.getName());
-                    param.put(jsonObject);
-                }
-                RequestBody body = RequestBody.create(MediaType.parse("application/json; charset=utf-8"),(param).toString());
-                return NetworkService.getNewsAPI().getFeatureImage(REQ_IMAGE_PROXY, body);
+            JSONArray param = new JSONArray();
+            for (NewsSourceBean source : newsSourcesBean.getSources()) {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("type", "source");
+                jsonObject.put("query", source.getName());
+                param.put(jsonObject);
             }
-        }, new BiFunction<NewsSourcesBean, IconsBean, NewsSourcesBean>() {
-            @Override
-            public NewsSourcesBean apply(NewsSourcesBean newsSourcesBean, IconsBean iconsBean) throws Exception {
-                HashMap<String, String> imgUrlMap = new HashMap<>();
-                for (int i = 0; i < iconsBean.getSize(); i++) {
-                    IconsBean.DataBean bean = iconsBean.getData().get(i);
-                    imgUrlMap.put(bean.getSource(), bean.getImgUrl());
-                }
-
-                for (NewsSourceBean source : newsSourcesBean.getSources()) {
-                    String sourceName = source.getName();
-                    source.setImgUrl(imgUrlMap.get(sourceName));
-                }
-                return newsSourcesBean;
-            }
-        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Observer<NewsSourcesBean>() {
-            @Override
-            public void onSubscribe(Disposable d) {
-
+            RequestBody body = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), (param).toString());
+            return NetworkService.getNewsAPI().getFeatureImage(REQ_IMAGE_PROXY, body);
+        }, (newsSourcesBean, iconsBean) -> {
+            HashMap<String, String> imgUrlMap = new HashMap<>();
+            for (int i = 0; i < iconsBean.getSize(); i++) {
+                IconsBean.DataBean bean = iconsBean.getData().get(i);
+                imgUrlMap.put(bean.getSource(), bean.getImgUrl());
             }
 
-            @Override
-            public void onNext(NewsSourcesBean sources) {
-                if (sources != null) {
-                    List<NewsSourceBean> sourceList = sources.getSources();
-                    if (sourceList != null && sourceList.size() > 0) {
-                        mView.renderSources(dbManger.reorderByIndex(sourceList));
+            for (NewsSourceBean source : newsSourcesBean.getSources()) {
+                String sourceName = source.getName();
+                source.setImgUrl(imgUrlMap.get(sourceName));
+            }
+            return newsSourcesBean;
+        }).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(sources -> {
+                    if (sources != null) {
+                        List<NewsSourceBean> sourceList = sources.getSources();
+                        if (sourceList != null && sourceList.size() > 0) {
+                            mView.renderSources(dbManger.reorderByIndex(sourceList));
+                        }
+                    } else {
+                        mView.renderSources(null);
                     }
-                } else {
+                }, e -> {
                     mView.renderSources(null);
-                }
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                mView.renderSources(null);
-                e.printStackTrace();
-            }
-
-            @Override
-            public void onComplete() {
-
-            }
-        });
+                    Timber.e(e);
+                });
 
     }
 
     @Override
     public void loadTopics() {
         List<NewsTopicsRequest> topicsList = dbManger.getTopics(true);
-        Observable.just(topicsList).subscribeOn(AndroidSchedulers.mainThread()).flatMap(new Function<List<NewsTopicsRequest>, ObservableSource<List<NewsTopicsRequest>>>() {
-            @Override
-            public ObservableSource<List<NewsTopicsRequest>> apply(List<NewsTopicsRequest> topicsList) throws Exception {
-                topicsList = new RealmManager().createCopy(topicsList);
-                return Observable.just(topicsList);
+        Observable.just(topicsList).subscribeOn(AndroidSchedulers.mainThread())
+                .flatMap(topicsList1 -> {
+                    topicsList1 = new RealmManager().createCopy(topicsList1);
+                    return Observable.just(topicsList1);
+                }).observeOn(Schedulers.io()).flatMap(topicsList13 -> {
+            JSONArray param = new JSONArray();
+            for (NewsTopicsRequest topic : topicsList13) {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("type", "topic");
+                jsonObject.put("query", topic.getQ());
+                param.put(jsonObject);
             }
-        }).observeOn(Schedulers.io()).flatMap(new Function<List<NewsTopicsRequest>, Observable<IconsBean>>() {
-            @Override
-            public Observable<IconsBean> apply(List<NewsTopicsRequest> topicsList) throws Exception {
-                JSONArray param = new JSONArray();
-                for (NewsTopicsRequest topic : topicsList) {
-                    JSONObject jsonObject = new JSONObject();
-                    jsonObject.put("type", "topic");
-                    jsonObject.put("query", topic.getQ());
-                    param.put(jsonObject);
-                }
-                RequestBody body = RequestBody.create(MediaType.parse("application/json; charset=utf-8"),(param).toString());
-                return NetworkService.getNewsAPI().getFeatureImage(REQ_IMAGE_PROXY, body);
-            }
-        }, new BiFunction<List<NewsTopicsRequest>, IconsBean, List<NewsTopicsRequest>>() {
-            @Override
-            public List<NewsTopicsRequest> apply(List<NewsTopicsRequest> topicsList, IconsBean iconsBean) throws Exception {
-                HashMap<String, String> imgUrlMap = new HashMap<>();
-                for (int i = 0; i < iconsBean.getSize(); i++) {
-                    IconsBean.DataBean bean = iconsBean.getData().get(i);
-                    imgUrlMap.put(bean.getSource(), bean.getImgUrl());
-                }
-
-                for (NewsTopicsRequest topic : topicsList) {
-                    String topicName = topic.getQ();
-                    topic.setImgUrl(imgUrlMap.get(topicName));
-                }
-                return topicsList;
-            }
-        }).observeOn(AndroidSchedulers.mainThread()).subscribe(new Observer<List<NewsTopicsRequest>>() {
-            @Override
-            public void onSubscribe(Disposable d) {
-
+            RequestBody body = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), (param).toString());
+            return NetworkService.getNewsAPI().getFeatureImage(REQ_IMAGE_PROXY, body);
+        }, (topicsList12, iconsBean) -> {
+            HashMap<String, String> imgUrlMap = new HashMap<>();
+            for (int i = 0; i < iconsBean.getSize(); i++) {
+                IconsBean.DataBean bean = iconsBean.getData().get(i);
+                imgUrlMap.put(bean.getSource(), bean.getImgUrl());
             }
 
-            @Override
-            public void onNext(List<NewsTopicsRequest> newsTopicsRequests) {
-                if (newsTopicsRequests != null && newsTopicsRequests.size() > 0) {
-                    mView.renderSources(newsTopicsRequests);
-                } else {
+            for (NewsTopicsRequest topic : topicsList12) {
+                String topicName = topic.getQ();
+                topic.setImgUrl(imgUrlMap.get(topicName));
+            }
+            return topicsList12;
+        }).observeOn(AndroidSchedulers.mainThread())
+                .subscribe(newsTopicsRequests -> {
+                    if (newsTopicsRequests != null && newsTopicsRequests.size() > 0) {
+                        mView.renderSources(newsTopicsRequests);
+                    } else {
+
+                    }
+                }, e -> {
                     mView.renderSources(null);
-                }
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                mView.renderSources(null);
-                e.printStackTrace();
-            }
-
-            @Override
-            public void onComplete() {
-
-            }
-        });
+                    Timber.e(e);
+                });
     }
 
     @Override

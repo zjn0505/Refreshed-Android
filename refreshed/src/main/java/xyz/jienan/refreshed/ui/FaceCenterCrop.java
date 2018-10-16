@@ -12,8 +12,6 @@ import android.util.SparseArray;
 
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.face.Face;
@@ -24,7 +22,6 @@ import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetector;
 
 import java.security.MessageDigest;
 import java.util.List;
-import java.util.Timer;
 
 import timber.log.Timber;
 

@@ -3,15 +3,10 @@ package xyz.jienan.refreshed.base;
 import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
-import io.realm.OrderedRealmCollectionSnapshot;
 import io.realm.Realm;
-import io.realm.RealmModel;
-import io.realm.RealmQuery;
 import io.realm.RealmResults;
 import xyz.jienan.refreshed.R;
 import xyz.jienan.refreshed.network.entity.ITabEntity;
