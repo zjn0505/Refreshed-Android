@@ -26,7 +26,7 @@ import static xyz.jienan.refreshed.network.NetworkService.REQ_UPDATE_TOPICS;
 public class NewsListPresenter implements NewsListContract.Presenter {
 
     private NewsListContract.View mView;
-    
+
     private IDBManager dbManger;
 
     NewsListPresenter(NewsListContract.View view) {
@@ -55,7 +55,8 @@ public class NewsListPresenter implements NewsListContract.Presenter {
                     category = topicsRequest.getCategory();
                 } else {
                     query = topicsRequest.getQ();
-                    alterObservable = newsAPI.getCustomQuery(query, topicsRequest.getLanguage(), TimeUtils.getNewsAgedFrom(topicsRequest.getNewsAgeInDays()), bypassCache);
+                    alterObservable = newsAPI.getCustomQuery(query, topicsRequest.getLanguage(),
+                            TimeUtils.getNewsAgedFrom(topicsRequest.getNewsAgeInDays()), bypassCache);
                 }
             } else {
                 topicsRequest = new NewsTopicsRequest();

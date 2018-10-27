@@ -266,7 +266,6 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
                             .transforms(isGoogleServiceAvailable ?
                                     new FaceCenterCrop() : new CenterCrop());
 
-
                     Glide.with(mIvThumbnail.getContext())
                             .load(article.getUrlToImage())
                             .apply(myOptions)

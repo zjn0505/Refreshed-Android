@@ -66,3 +66,5 @@
 }
 
 -dontwarn com.bumptech.glide.load.resource.bitmap.VideoDecoder
+-dontwarn xyz.jienan.refreshed.news_list.NewsListPresenter
+-dontwarn xyz.jienan.refreshed.base.RealmManager
