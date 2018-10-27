@@ -6,13 +6,10 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.support.annotation.NonNull;
-import android.util.SparseArray;
 
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
-import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.face.Face;
-import com.google.android.gms.vision.face.FaceDetector;
 import com.google.firebase.ml.vision.common.FirebaseVisionImage;
 import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetector;
 
@@ -71,8 +68,7 @@ public class FaceCenterCrop extends BitmapTransformation {
 
             PointF focusPoint = new PointF();
 
-            detectFace(original, focusPoint);
-//            detectFaceML(original, focusPoint);
+            detectFaceML(original, focusPoint);
 
             if (scaleX < scaleY) {
 
@@ -97,42 +93,6 @@ public class FaceCenterCrop extends BitmapTransformation {
         } else {
             return original;
         }
-    }
-
-    /**
-     * Calculates a point (focus point) in the bitmap, around which cropping needs to be performed.
-     *
-     * @param bitmap           Bitmap in which faces are to be detected.
-     * @param centerOfAllFaces To store the center point.
-     */
-    private void detectFace(Bitmap bitmap, PointF centerOfAllFaces) {
-        final long time = System.currentTimeMillis();
-        FaceDetector faceDetector = GlideFaceDetector.getFaceDetector();
-        if (!faceDetector.isOperational()) {
-            centerOfAllFaces.set(bitmap.getWidth() / 2, bitmap.getHeight() / 2); // center crop
-            return;
-        }
-        Frame frame = new Frame.Builder().setBitmap(bitmap).build();
-        SparseArray<Face> faces = faceDetector.detect(frame);
-        final int totalFaces = faces.size();
-        if (totalFaces > 0) {
-            float sumX = 0f;
-            float sumY = 0f;
-            for (int i = 0; i < totalFaces; i++) {
-                PointF faceCenter = new PointF();
-                getFaceCenter(faces.get(faces.keyAt(i)), faceCenter);
-                sumX = sumX + faceCenter.x;
-                sumY = sumY + faceCenter.y;
-            }
-            centerOfAllFaces.set(sumX / totalFaces, sumY / totalFaces);
-            Timber.e("Face detected %d center moved : x %f, y %f" ,
-                    totalFaces,
-                    sumX / totalFaces - bitmap.getWidth() / 2,
-                    sumY / totalFaces - bitmap.getHeight() / 2);
-            Timber.e("Take time " + (System.currentTimeMillis() - time));
-            return;
-        }
-        centerOfAllFaces.set(bitmap.getWidth() / 2, bitmap.getHeight() / 2); // center crop
     }
 
     /**

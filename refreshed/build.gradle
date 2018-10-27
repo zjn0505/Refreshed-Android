@@ -25,7 +25,6 @@ android {
                 NEWSAPI_API_KEY : System.getenv("NEWSAPI_API_KEY") ? System.getenv("NEWSAPI_API_KEY") : (properties['NEWSAPI_API_KEY'] ? properties['NEWSAPI_API_KEY'] : (project.hasProperty("NEWSAPI_API_KEY") ? NEWSAPI_API_KEY : "")),
                 ALTER_HOST_API_KEY : System.getenv("ALTER_HOST_API_KEY") ? System.getenv("ALTER_HOST_API_KEY") : (properties['ALTER_HOST_API_KEY'] ? properties['ALTER_HOST_API_KEY'] : (project.hasProperty("ALTER_HOST_API_KEY") ? ALTER_HOST_API_KEY : "")),
         ]
-        multiDexEnabled true
     }
     signingConfigs {
         releaseConfig {
@@ -117,10 +116,8 @@ dependencies {
     implementation 'com.github.gturedi:stateful-layout:1.2.1'
     implementation 'com.google.firebase:firebase-core:16.0.4'
     implementation 'com.google.firebase:firebase-ads:17.0.0'
-    implementation 'com.google.firebase:firebase-ml-vision:17.0.1'
-    implementation 'com.google.android.gms:play-services-vision:' + rootProject.googleLibVersion
+    implementation 'com.google.firebase:firebase-ml-vision:18.0.1'
     implementation 'com.crashlytics.sdk.android:crashlytics:2.9.5'
-    implementation 'com.android.support:multidex:1.0.3'
     implementation 'com.jakewharton.timber:timber:4.7.1'
 
 }
