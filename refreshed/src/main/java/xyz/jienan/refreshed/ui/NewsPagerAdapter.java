@@ -3,13 +3,13 @@ package xyz.jienan.refreshed.ui;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
-import android.util.Log;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import timber.log.Timber;
 import xyz.jienan.refreshed.network.entity.ITabEntity;
 import xyz.jienan.refreshed.news_list.INewsListFragmentListener;
 import xyz.jienan.refreshed.news_list.NewsListFragment;
@@ -35,9 +35,9 @@ public class NewsPagerAdapter extends FragmentStatePagerAdapter {
         String title = fragment.getFragmentName();
         int i = getItemPosition(title);
         if (i == POSITION_NONE) {
-            Log.d("pager", title + " recreated");
+            Timber.d("%s recreated", title);
         } else {
-            Log.d("pager", title + " load from position " + i);
+            Timber.d("%s load from position %d", title, i);
         }
         return POSITION_NONE;
     }

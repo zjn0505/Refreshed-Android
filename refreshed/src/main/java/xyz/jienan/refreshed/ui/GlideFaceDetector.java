@@ -52,7 +52,7 @@ public class GlideFaceDetector {
         }
     }
 
-    public static FaceDetector getFaceDetector() {
+    static FaceDetector getFaceDetector() {
         initDetector();
         return faceDetector;
     }

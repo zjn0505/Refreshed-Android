@@ -8,8 +8,8 @@ import io.reactivex.subjects.PublishSubject;
  */
 
 public class RxBus {
-    public RxBus() {
 
+    RxBus() {
     }
 
     private PublishSubject<Object> bus = PublishSubject.create();

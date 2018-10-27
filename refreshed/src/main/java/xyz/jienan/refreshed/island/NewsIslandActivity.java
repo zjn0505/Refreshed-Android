@@ -22,7 +22,9 @@ import xyz.jienan.refreshed.news_list.NewsListFragment;
 public class NewsIslandActivity extends AppCompatActivity implements NewsIslandContract.View{
 
     private ImageView tvAddTopics;
+
     private NewsIslandContract.Presenter mPresenter;
+
     private String source;
 
     @Override
@@ -31,24 +33,20 @@ public class NewsIslandActivity extends AppCompatActivity implements NewsIslandC
         mPresenter = new NewsIslandPresenter(this);
         setContentView(R.layout.activity_island);
         Intent intent = getIntent();
-        final String source = intent.getStringExtra("source");
+        source = intent.getStringExtra("source");
         mPresenter.checkNewsDays(source);
         setTitle(source);
-        this.source = source;
         tvAddTopics = findViewById(R.id.tv_add_topics);
         if (mPresenter.ifTopicsExist(source)) {
             tvAddTopics.setVisibility(View.GONE);
         } else {
-            tvAddTopics.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (mPresenter.addTopics(source)) {
-                        Toast.makeText(NewsIslandActivity.this, "Topic " + source + " added", Toast.LENGTH_SHORT).show();
-                        tvAddTopics.setVisibility(View.GONE);
-                        setResult(RESULT_OK);
-                    } else {
-                        Toast.makeText(NewsIslandActivity.this, "Failed to add topics", Toast.LENGTH_SHORT).show();
-                    }
+            tvAddTopics.setOnClickListener(v -> {
+                if (mPresenter.addTopics(source)) {
+                    Toast.makeText(NewsIslandActivity.this, "Topic " + source + " added", Toast.LENGTH_SHORT).show();
+                    tvAddTopics.setVisibility(View.GONE);
+                    setResult(RESULT_OK);
+                } else {
+                    Toast.makeText(NewsIslandActivity.this, "Failed to add topics", Toast.LENGTH_SHORT).show();
                 }
             });
         }
@@ -60,8 +58,9 @@ public class NewsIslandActivity extends AppCompatActivity implements NewsIslandC
             case android.R.id.home:
                 onBackPressed();
                 return true;
+            default:
+                return false;
         }
-        return super.onOptionsItemSelected(item);
     }
 
     @Override

@@ -8,7 +8,6 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,12 +21,10 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.gturedi.views.StatefulLayout;
 
-import java.util.Collections;
 import java.util.List;
 
 import xyz.jienan.refreshed.R;
 import xyz.jienan.refreshed.network.entity.ITabEntity;
-import xyz.jienan.refreshed.network.entity.NewsSourceBean;
 import xyz.jienan.refreshed.ui.GridItemDecoration;
 
 import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
@@ -91,18 +88,15 @@ public class SourcesSelectActivity extends AppCompatActivity implements SourceSe
     @Override
     public void renderSources(List<? extends ITabEntity> sources) {
         if (sources == null) {
-            stateful.showError(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (R.integer.type_source == type) {
-                        mPresenter.loadSources();
-                    } else {
-                        mPresenter.loadTopics();
-                    }
-                    stateful.showLoading();
+            stateful.showError(v -> {
+                if (R.integer.type_source == type) {
+                    mPresenter.loadSources();
+                } else {
+                    mPresenter.loadTopics();
                 }
+                stateful.showLoading();
             });
-        } else if (sources.size() == 0){
+        } else if (sources.isEmpty()){
             stateful.showEmpty();
         } else {
             mAdapter.updateList((List<ITabEntity>) sources);
@@ -150,37 +144,36 @@ public class SourcesSelectActivity extends AppCompatActivity implements SourceSe
             setResult(RESULT_OK);
         }
 
-        public class ViewHolder extends RecyclerView.ViewHolder {
+        class ViewHolder extends RecyclerView.ViewHolder {
 
-            public final View mView;
-            public final TextView mTvName;
-            public final TextView mTvDescription;
-            public final CheckBox mCkbSelect;
-            public final ImageView mIvIcon;
+            final View mView;
+            final TextView mTvName;
+            final TextView mTvDescription;
+            final CheckBox mCkbSelect;
+            final ImageView mIvIcon;
 
-            public ViewHolder(View view) {
+            ViewHolder(View view) {
                 super(view);
                 mView = view;
-                mTvName = (TextView) view.findViewById(R.id.tv_source_name);
-                mTvDescription = (TextView) view.findViewById(R.id.tv_source_description);
-                mCkbSelect = (CheckBox) view.findViewById(R.id.cbx_selected);
-                mIvIcon = (ImageView) view.findViewById(R.id.iv_icon);
+                mTvName = view.findViewById(R.id.tv_source_name);
+                mTvDescription = view.findViewById(R.id.tv_source_description);
+                mCkbSelect = view.findViewById(R.id.cbx_selected);
+                mIvIcon = view.findViewById(R.id.iv_icon);
             }
-
         }
 
         private List<ITabEntity> sourceList;
 
-        public SourcesAdapter(List<ITabEntity> list) {
+        SourcesAdapter(List<ITabEntity> list) {
             sourceList = list;
         }
 
-        public void updateList(List<ITabEntity> list) {
+        void updateList(List<ITabEntity> list) {
             sourceList = list;
             notifyDataSetChanged();
         }
 
-        public void updateList(List<ITabEntity> list, int from, int to) {
+        void updateList(List<ITabEntity> list, int from, int to) {
             sourceList = list;
             notifyItemMoved(from, to);
         }
@@ -196,20 +189,17 @@ public class SourcesSelectActivity extends AppCompatActivity implements SourceSe
             final ITabEntity bean = sourceList.get(position);
             holder.mTvName.setText(bean.getName());
             holder.mCkbSelect.setChecked(bean.getIndex() > -1);
-            holder.mView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (holder.getAdapterPosition() == 0) {
-                        if (sourceList.size() > 1 && sourceList.get(1).getIndex() == -1) {
-                            Toast.makeText(mContext, getString(R.string.keep_at_least_one_source), Toast.LENGTH_SHORT).show();
-                            return;
-                        }
+            holder.mView.setOnClickListener(v -> {
+                if (holder.getAdapterPosition() == 0) {
+                    if (sourceList.size() > 1 && sourceList.get(1).getIndex() == -1) {
+                        Toast.makeText(mContext, getString(R.string.keep_at_least_one_source), Toast.LENGTH_SHORT).show();
+                        return;
                     }
-                    final boolean wasChecked = holder.mCkbSelect.isChecked();
-                    holder.mCkbSelect.setChecked(!wasChecked);
-                    mPresenter.changeSelection(sourceList, wasChecked, holder.getAdapterPosition());
-                    setResult(RESULT_OK);
                 }
+                final boolean wasChecked = holder.mCkbSelect.isChecked();
+                holder.mCkbSelect.setChecked(!wasChecked);
+                mPresenter.changeSelection(sourceList, wasChecked, holder.getAdapterPosition());
+                setResult(RESULT_OK);
             });
             RequestOptions myOptions = new RequestOptions()
                     .fitCenter().placeholder(R.drawable.image_placeholder);

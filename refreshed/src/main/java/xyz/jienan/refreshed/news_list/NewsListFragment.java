@@ -55,7 +55,7 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
     private RecyclerView rvNews;
     private NewsListContract.Presenter mPresenter;
     private int type;
-    private static boolean isGoogleServiceAvaliable = false;
+    private static boolean isGoogleServiceAvailable = false;
     private boolean forceBypassCache = false;
     private int newsDays = 60;
 
@@ -66,7 +66,7 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
         args.putString("name", name);
         args.putInt("type", type);
         newsListFragment.setArguments(args);
-        isGoogleServiceAvaliable = RefreshedApplication.getInstance().isGoogleServiceAvaliable;
+        isGoogleServiceAvailable = RefreshedApplication.getInstance().isGoogleServiceAvailable;
         return newsListFragment;
     }
 
@@ -169,7 +169,7 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
     public void renderList(ArticlesBean articlesBean) {
         if (articlesBean != null) {
             List<ArticleBean> articles = articlesBean.getArticles();
-            if (articles != null && articles.size() > 0) {
+            if (articles != null && !articles.isEmpty()) {
                 stateful.showContent();
                 refreshLayout.setEnabled(true);
                 refreshLayout.setRefreshing(false);
@@ -179,19 +179,14 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
                 AnalyticsManager.getInstance().logEvent(EVENT_LIST_EMPTY);
             }
         } else {
-            stateful.showError(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mPresenter.loadList(newsSource, type, newsDays, BYPASS_CACHE);
-                    stateful.showLoading();
-                    AnalyticsManager.getInstance().logEvent(EVENT_LIST_RELOAD);
-                }
+            stateful.showError(v -> {
+                mPresenter.loadList(newsSource, type, newsDays, BYPASS_CACHE);
+                stateful.showLoading();
+                AnalyticsManager.getInstance().logEvent(EVENT_LIST_RELOAD);
             });
             AnalyticsManager.getInstance().logEvent(EVENT_LIST_ERROR);
         }
-
     }
-
 
     private static class NewsAdapter
             extends RecyclerView.Adapter<NewsAdapter.ViewHolder> {
@@ -218,19 +213,19 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
 
         public class ContentViewHolder extends ViewHolder {
 
-            public final View mView;
-            public final ImageView mIvThumbnail;
-            public final TextView mTvTitle;
-            public final TextView mTvDescription;
-            public final TextView mTvPublishTime;
+            final View mView;
+            final ImageView mIvThumbnail;
+            final TextView mTvTitle;
+            final TextView mTvDescription;
+            final TextView mTvPublishTime;
 
-            public ContentViewHolder(View view) {
+            ContentViewHolder(View view) {
                 super(view);
                 mView = view;
-                mIvThumbnail = (ImageView) view.findViewById(R.id.iv_thumbnails);
-                mTvTitle = (TextView) view.findViewById(R.id.tv_title);
-                mTvDescription = (TextView) view.findViewById(R.id.tv_description);
-                mTvPublishTime = (TextView) view.findViewById(R.id.tv_publish_time);
+                mIvThumbnail = view.findViewById(R.id.iv_thumbnails);
+                mTvTitle = view.findViewById(R.id.tv_title);
+                mTvDescription = view.findViewById(R.id.tv_description);
+                mTvPublishTime = view.findViewById(R.id.tv_publish_time);
             }
 
             @Override
@@ -253,18 +248,12 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
                     mTvPublishTime.setTextColor(colorSecondary);
                 }
 
-                mView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        realm.executeTransaction(new Realm.Transaction() {
-                            @Override
-                            public void execute(Realm realm) {
-                                articleDB.increaseAccessCount();
-                                realm.insertOrUpdate(articleDB);
-                            }
-                        });
-                        WebUtils.openLink(v.getContext(), article.getUrl());
-                    }
+                mView.setOnClickListener(v -> {
+                    realm.executeTransaction(realm -> {
+                        articleDB.increaseAccessCount();
+                        realm.insertOrUpdate(articleDB);
+                    });
+                    WebUtils.openLink(v.getContext(), article.getUrl());
                 });
 
                 String imgUrl = article.getUrlToImage();
@@ -273,10 +262,9 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
                 } else {
                     mIvThumbnail.setVisibility(View.VISIBLE);
                     RequestOptions myOptions = new RequestOptions()
-                            .placeholder(R.drawable.image_placeholder);
-
-                    if (isGoogleServiceAvaliable)
-                        myOptions.transforms(new CenterCrop(), new FaceCenterCrop(mContext));
+                            .placeholder(R.drawable.image_placeholder)
+                            .transforms(isGoogleServiceAvailable ?
+                                    new FaceCenterCrop() : new CenterCrop());
 
                     Glide.with(mIvThumbnail.getContext())
                             .load(article.getUrlToImage())
@@ -287,26 +275,23 @@ public class NewsListFragment extends Fragment implements NewsListContract.View,
             }
         }
 
-        public NewsAdapter(Context context, List<ArticleBean> items) {
+        NewsAdapter(Context context, List<ArticleBean> items) {
 
             mContext = context;
             mArticles = items;
             realm = Realm.getDefaultInstance();
         }
 
-        public void updateList(List<ArticleBean> articles) {
+        void updateList(List<ArticleBean> articles) {
             mArticles = articles;
             Collections.sort(mArticles, new ArticleBean.ReleaseComparator());
-            realm.executeTransaction(new Realm.Transaction() {
-                @Override
-                public void execute(Realm realm) {
-                    for (ArticleBean articleBean : mArticles) {
-                        if (realm.where(ArticleBean.class).equalTo("url", articleBean.getUrl()).count() == 0){
-                            realm.copyToRealm(articleBean);
-                        }
+            realm.executeTransaction(realm -> {
+                for (ArticleBean articleBean : mArticles) {
+                    if (realm.where(ArticleBean.class).equalTo("url", articleBean.getUrl()).count() == 0){
+                        realm.copyToRealm(articleBean);
                     }
-                    notifyDataSetChanged();
                 }
+                notifyDataSetChanged();
             });
         }
 

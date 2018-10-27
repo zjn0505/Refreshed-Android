@@ -1,18 +1,12 @@
 package xyz.jienan.refreshed.base;
 
-import android.util.Log;
-
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
-import io.realm.OrderedRealmCollectionSnapshot;
 import io.realm.Realm;
-import io.realm.RealmModel;
-import io.realm.RealmQuery;
 import io.realm.RealmResults;
+import timber.log.Timber;
 import xyz.jienan.refreshed.R;
 import xyz.jienan.refreshed.network.entity.ITabEntity;
 import xyz.jienan.refreshed.network.entity.NewsSourceBean;
@@ -24,27 +18,23 @@ import xyz.jienan.refreshed.network.entity.NewsTopicsRequest;
 
 public class RealmManager implements IDBManager {
 
-    private final static String[] RECOMMEND_SOURCES = new String[]{"ars-technica", "cnbc", "espn", "polygon"};
-    private final static String[] RECOMMEND_TOPICS = new String[]{"business", "entertainment", "general", "health", "science", "sports", "technology"};
+    private final static String[] RECOMMEND_SOURCES = new String[]{"ars-technica", "cnbc", "espn",
+            "polygon", "the-washington-post", "the-wall-street-journal", "the-new-york-times"};
+
+    private final static String[] RECOMMEND_TOPICS = new String[]{"business", "entertainment",
+            "general", "health", "science", "sports", "technology"};
 
     private Realm realm;
-    private Realm alterRealm;
 
     public RealmManager() {
         realm = Realm.getDefaultInstance();
-        alterRealm = Realm.getDefaultInstance();
     }
 
     @Override
     public List<NewsSourceBean> reorderByIndex(final List<NewsSourceBean> sourceList) {
         boolean hasValidSources = false;
         if (realm.where(NewsSourceBean.class).findAll().size() == 0) {
-            realm.executeTransaction(new Realm.Transaction() {
-                @Override
-                public void execute(Realm realm) {
-                    realm.insert(sourceList);
-                }
-            });
+            realm.executeTransaction(realm -> realm.insert(sourceList));
         } else {
             RealmResults<NewsSourceBean> result = realm.where(NewsSourceBean.class).greaterThan("index", -1).findAll().sort("index");
             String s ="";
@@ -53,7 +43,7 @@ public class RealmManager implements IDBManager {
                 if (bean.getIndex() == -1) break;
                 s += i + " " + bean.getName() + " | ";
             }
-            Log.d("zjn", "reorderByIndex: "+s);
+            Timber.d("reorderByIndex: %s", s);
             if (result != null && result.size() != 0) {
                 for (NewsSourceBean source : sourceList) {
                     if (result != null && result.contains(source)) {
@@ -75,12 +65,7 @@ public class RealmManager implements IDBManager {
                 final NewsSourceBean sourceDB = realm.where(NewsSourceBean.class).equalTo("id", recSource).findFirst();
                 if (sourceDB != null) {
                     final int finalI = i;
-                    realm.executeTransaction(new Realm.Transaction() {
-                        @Override
-                        public void execute(Realm realm) {
-                            sourceDB.setIndex(finalI);
-                        }
-                    });
+                    realm.executeTransaction(realm -> sourceDB.setIndex(finalI));
                     int position = sourceList.indexOf(new NewsSourceBean(recSource));
                     sourceList.get(position).setIndex(i);
                 }
@@ -94,7 +79,7 @@ public class RealmManager implements IDBManager {
             if (bean.getIndex() == -1) break;
             s += i + " " + bean.getName() + " | ";
         }
-        Log.d("zjn", "reorderByIndex: "+s);
+        Timber.d("reorderByIndex: %s", s);
         return sourceList;
     }
 
@@ -148,7 +133,7 @@ public class RealmManager implements IDBManager {
             if (bean.getIndex() == -1) break;
             s += i + " " + bean.getName() + " | ";
         }
-        Log.d("zjn", "reorderByIndex: "+s);
+        Timber.d("reorderByIndex: %s", s);
         if (result != null && result.size() != 0) {
             for (NewsTopicsRequest source : sourceList) {
                 if (result != null && result.contains(source)) {
@@ -170,14 +155,13 @@ public class RealmManager implements IDBManager {
             if (bean.getIndex() == -1) break;
             s += i + " " + bean.getName() + " | ";
         }
-        Log.d("zjn", "reorderByIndex: "+s);
+        Timber.d("reorderByIndex: %s", s);
         return sourceList;
     }
 
     @Override
     public int updateIndexForTopics(List<NewsTopicsRequest> sourceList, boolean wasSelected, int position) {
         int toPosition = 0;
-        Log.e("Realm", "clicked: " + position);
         final NewsTopicsRequest beanDB = realm.where(NewsTopicsRequest.class).equalTo("q", sourceList.get(position).getId()).findFirst();
         if (beanDB != null) {
             realm.beginTransaction();
@@ -190,11 +174,9 @@ public class RealmManager implements IDBManager {
                     NewsTopicsRequest bean = sourceList.get(i);
                     if (i == position) {
                         bean.setIndex(-1);
-                        Log.e("Realm", "set to -1: " + i);
                     } else if (bean.getIndex() == -1) {
                         break;
                     } else {
-                        Log.e("Realm", "value -1: " + i);
                         bean.setIndex(i - 1);
                     }
                     toPosition = i;
@@ -206,7 +188,6 @@ public class RealmManager implements IDBManager {
                 for (NewsTopicsRequest bean : sourceList) {
                     if (bean.getIndex() > maxIndex) {
                         maxIndex = bean.getIndex();
-                        Log.e("Realm", "max index : " + maxIndex);
                     }
                     if (bean.getIndex() == -1) {
                         break;
@@ -225,19 +206,16 @@ public class RealmManager implements IDBManager {
     public List<NewsTopicsRequest> getTopics(boolean withCandidates) {
         RealmResults queryResult = realm.where(NewsTopicsRequest.class).greaterThan("index", -1).or().in("q", RECOMMEND_TOPICS).findAll();
         if (queryResult.size() == 0) {
-            realm.executeTransaction(new Realm.Transaction() {
-                @Override
-                public void execute(Realm realm) {
-                    List<NewsTopicsRequest> recommendTopics = new ArrayList<>();
-                    for (int i = 0; i < RECOMMEND_TOPICS.length; i++) {
-                        NewsTopicsRequest topic = new NewsTopicsRequest();
-                        topic.setCategory(RECOMMEND_TOPICS[i]);
-                        topic.setQ(RECOMMEND_TOPICS[i]);
-                        topic.setIndex(i);
-                        recommendTopics.add(topic);
-                    }
-                    realm.insert(recommendTopics);
+            realm.executeTransaction(realm -> {
+                List<NewsTopicsRequest> recommendTopics = new ArrayList<>();
+                for (int i = 0; i < RECOMMEND_TOPICS.length; i++) {
+                    NewsTopicsRequest topic = new NewsTopicsRequest();
+                    topic.setCategory(RECOMMEND_TOPICS[i]);
+                    topic.setQ(RECOMMEND_TOPICS[i]);
+                    topic.setIndex(i);
+                    recommendTopics.add(topic);
                 }
+                realm.insert(recommendTopics);
             });
         }
         if (!withCandidates) {
@@ -268,7 +246,7 @@ public class RealmManager implements IDBManager {
         try {
             realm.commitTransaction();
         } catch (Exception e) {
-            e.printStackTrace();
+            Timber.e(e);
             if (realm.isInTransaction()) {
                 realm.cancelTransaction();
             }
@@ -279,65 +257,53 @@ public class RealmManager implements IDBManager {
 
     @Override
     public void updateListForReordering(final List<NewsSourceBean> sourceList) {
-        realm.executeTransaction(new Realm.Transaction() {
-            @Override
-            public void execute(Realm realm) {
-                for (int i = 0; i < sourceList.size(); i++) {
-                    NewsSourceBean bean = sourceList.get(i);
-                    if (bean.getIndex() == -1) {
-                        break;
-                    }
-                    bean.setIndex(i);
+        realm.executeTransaction(realm -> {
+            for (int i = 0; i < sourceList.size(); i++) {
+                NewsSourceBean bean = sourceList.get(i);
+                if (bean.getIndex() == -1) {
+                    break;
                 }
-                realm.insertOrUpdate(sourceList);
+                bean.setIndex(i);
             }
+            realm.insertOrUpdate(sourceList);
         });
     }
 
     @Override
     public void updateListForReorderingForTopics(final List<NewsTopicsRequest> sourceList) {
-        realm.executeTransaction(new Realm.Transaction() {
-            @Override
-            public void execute(Realm realm) {
-                for (int i = 0; i < sourceList.size(); i++) {
-                    NewsTopicsRequest bean = sourceList.get(i);
-                    if (bean.getIndex() == -1) {
-                        break;
-                    }
-                    bean.setIndex(i);
+        realm.executeTransaction(realm -> {
+            for (int i = 0; i < sourceList.size(); i++) {
+                NewsTopicsRequest bean = sourceList.get(i);
+                if (bean.getIndex() == -1) {
+                    break;
                 }
-                realm.insertOrUpdate(sourceList);
+                bean.setIndex(i);
             }
+            realm.insertOrUpdate(sourceList);
         });
     }
 
     @Override
     public void setForceEverything(final String newsSource) {
-        realm.executeTransaction(new Realm.Transaction() {
-            @Override
-            public void execute(Realm realm) {
-                NewsTopicsRequest topic = realm.where(NewsTopicsRequest.class).equalTo("q", newsSource).findFirst();
-                topic.setForceEverything(true);
-                realm.insertOrUpdate(topic);
-            }
+        realm.executeTransaction(realm -> {
+            NewsTopicsRequest topic = realm.where(NewsTopicsRequest.class).equalTo("q", newsSource).findFirst();
+            topic.setForceEverything(true);
+            realm.insertOrUpdate(topic);
         });
     }
 
     @Override
     public void adjustTopicsDays(final String newsSource, final int days) {
-        realm.executeTransaction(new Realm.Transaction() {
-            @Override
-            public void execute(Realm realm) {
-                NewsTopicsRequest topic = realm.where(NewsTopicsRequest.class).equalTo("q", newsSource).findFirst();
-                if (topic != null)
-                    topic.setNewsAgeInDays(days);
-                else {
-                    topic = new NewsTopicsRequest();
-                    topic.setNewsAgeInDays(days);
-                    topic.setQ(newsSource);
-                }
-                realm.insertOrUpdate(topic);
+        realm.executeTransaction(realm -> {
+            NewsTopicsRequest topic = realm.where(NewsTopicsRequest.class).equalTo("q", newsSource).findFirst();
+            if (topic != null)
+                topic.setNewsAgeInDays(days);
+            else {
+                topic = new NewsTopicsRequest();
+                topic.setNewsAgeInDays(days);
+                topic.setQ(newsSource);
             }
+            realm.insertOrUpdate(topic);
         });
     }
 

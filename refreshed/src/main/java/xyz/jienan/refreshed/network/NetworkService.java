@@ -60,16 +60,13 @@ public class NetworkService {
 
     private NetworkService() {
         OkHttpClient.Builder httpClientBuilder = new OkHttpClient.Builder();
-        httpClientBuilder.addInterceptor(new Interceptor() {
-            @Override
-            public Response intercept(Chain chain) throws IOException {
-                Request request = chain.request();
-                if (request.url().toString().startsWith(HOST)) {
-                    request = chain.request().newBuilder()
-                            .header("X-Api-Key", MetaUtils.getMeta(NEWSAPI_API_KEY)).build();
-                }
-                return chain.proceed(request);
+        httpClientBuilder.addInterceptor(chain -> {
+            Request request = chain.request();
+            if (request.url().toString().startsWith(HOST)) {
+                request = chain.request().newBuilder()
+                        .header("X-Api-Key", MetaUtils.getMeta(NEWSAPI_API_KEY)).build();
             }
+            return chain.proceed(request);
         });
 
         httpClientBuilder.addNetworkInterceptor(new NetworkCacheInterceptor())

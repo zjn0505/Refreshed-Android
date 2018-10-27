@@ -41,7 +41,7 @@
 # Gson
 -keep class com.google.gson.stream.** { *; }
 -keepattributes EnclosingMethod
--keep class xyz.jienan.refreshed.network.**{*;}
+-keep class xyz.jienan.refreshed.network.entity.**{*;}
 
 -dontwarn sun.misc.**
 
@@ -66,3 +66,5 @@
 }
 
 -dontwarn com.bumptech.glide.load.resource.bitmap.VideoDecoder
+-dontwarn xyz.jienan.refreshed.news_list.NewsListPresenter
+-dontwarn xyz.jienan.refreshed.base.RealmManager

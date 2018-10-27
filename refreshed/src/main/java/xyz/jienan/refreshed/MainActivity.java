@@ -30,7 +30,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -41,6 +40,8 @@ import com.google.android.gms.ads.MobileAds;
 
 import java.util.List;
 
+import timber.log.Timber;
+import xyz.jienan.refreshed.base.AdsManager;
 import xyz.jienan.refreshed.base.RefreshedApplication;
 import xyz.jienan.refreshed.network.entity.ITabEntity;
 import xyz.jienan.refreshed.network.entity.NewsSourceBean;
@@ -50,8 +51,6 @@ import xyz.jienan.refreshed.sources_fragment.topics.TopicsFragment;
 import xyz.jienan.refreshed.ui.DrawerAdapter;
 import xyz.jienan.refreshed.ui.DrawerAdapter.IDrawerItemClickListener;
 import xyz.jienan.refreshed.ui.GlideFaceDetector;
-
-import static xyz.jienan.refreshed.MetaUtils.ADMOB_APP_ID;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -75,9 +74,11 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         final ActionBar ab = getSupportActionBar();
-        ab.setHomeAsUpIndicator(R.drawable.ic_menu);
-        ab.setDisplayHomeAsUpEnabled(true);
-        MobileAds.initialize(this, MetaUtils.getMeta(ADMOB_APP_ID));
+        if (ab != null) {
+            ab.setHomeAsUpIndicator(R.drawable.ic_menu);
+            ab.setDisplayHomeAsUpEnabled(true);
+        }
+        MobileAds.initialize(this, AdsManager.getAdsAppId());
         GlideFaceDetector.initialize(this);
         mDrawerLayout = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.nav_view);
@@ -125,7 +126,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
         mDrawerScroller.setOnTouchListener((v, event) -> {
-            Log.d("Touch", "onTouch: scroller " + event.getAction());
+            Timber.d("onTouch: scroller " + event.getAction());
             if (event.getAction() == MotionEvent.ACTION_MOVE || event.getAction() == MotionEvent.ACTION_DOWN) {
                 blockTouch = true;
             } else if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
@@ -134,12 +135,11 @@ public class MainActivity extends AppCompatActivity {
             return false;
         });
         mDrawerLayout.setOnTouchListener((v, event) -> {
-            Log.d("Touch", "onTouch: drawer " + event.getAction());
-//                if (blockTouch)
+            Timber.d("onTouch: drawer " + event.getAction());
             if (blockTouch && event.getAction() == MotionEvent.ACTION_MOVE) {
-                Log.d("Touch", "onTouch: drawer blocked");
+                Timber.d("onTouch: drawer blocked");
             } else if (!blockTouch && event.getAction() == MotionEvent.ACTION_MOVE) {
-                Log.d("Touch", "onTouch: drawer not blocked");
+                Timber.d("onTouch: drawer not blocked");
             }
             return blockTouch;
         });
