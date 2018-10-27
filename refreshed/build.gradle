@@ -46,7 +46,7 @@ android {
     buildTypes {
         debug {
             zipAlignEnabled true
-//            applicationIdSuffix ".debug"
+            applicationIdSuffix ".debug"
             minifyEnabled true
             zipAlignEnabled true
             shrinkResources true

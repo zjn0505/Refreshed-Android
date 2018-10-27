@@ -3,6 +3,7 @@ package xyz.jienan.refreshed;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 
+import timber.log.Timber;
 import xyz.jienan.refreshed.base.RefreshedApplication;
 
 /**
@@ -30,7 +31,7 @@ public class MetaUtils {
             }
 
         } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
+            Timber.e(e);
         }
         return result;
     }
